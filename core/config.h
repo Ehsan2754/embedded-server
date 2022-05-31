@@ -10,5 +10,6 @@
 #define PIN_LED 2     //On board LED
 
 // PT
+void printWifiStatus();
 
 #endif //__CONFIG_H__

@@ -1,5 +1,5 @@
-#ifndef WEB_H
-#define WEB_H
+#ifndef __WEB_H__
+#define __WEB_H__
 const char PAGE_MAIN[] PROGMEM = R"=====(
     
      <!DOCTYPE html>
@@ -433,5 +433,5 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 
 
 )=====";
-#endif //WEB_H
+#endif //__WEB_H__
 

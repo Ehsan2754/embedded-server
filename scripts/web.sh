@@ -6,8 +6,8 @@ HTML_PATH="${STATIC_PATH}index.html";
 TARGET=core/web.h;
 
 # Preservations for the header file
-PREFIX="#ifndef WEB_H
-#define WEB_H
+PREFIX="#ifndef __WEB_H__
+#define __WEB_H__
 const char PAGE_MAIN[] PROGMEM = R\"=====(
     
     "
@@ -17,7 +17,7 @@ SUFFIX="
 
 
 )=====\";
-#endif //WEB_H
+#endif //__WEB_H__
 ";
 HTML_SRC=`cat ${HTML_PATH}`
 echo "${PREFIX} ${HTML_SRC} ${SUFFIX}" > ${TARGET};

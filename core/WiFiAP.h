@@ -9,6 +9,10 @@
 
 
 // WIFI Manager 
+#ifndef PIN_TRIGGER
+#define PIN_TRIGGER 0 // BOOT PIN which will reset the ssid
+#endif
+#define AP_TIMEOUT 60
 #define BLOCKING_MODE true
 #define TITLE "ZARNITZA Device Configuration"
 
@@ -21,6 +25,6 @@ extern WiFiManager wm; // global wm instance
 extern WiFiManagerParameter custom_field; // global param ( for non blocking w params )
 
 void WifiAP_setup();
-void WifiAP_loop();
+void WifiAP_loop(void * pvParameters);
 
 #endif //__WIFIAP_H__
