@@ -799,6 +799,7 @@ var app = (function () {
         strings["reject"] = "\u041E\u0442\u043C\u0435\u043D\u0430";
         strings["exitFromDashboardTitle"] = "<b>\u0412\u044B\u0445\u043E\u0434 \u0438\u0437 \u0440\u0435\u0436\u0438\u043C\u0430 \u0438\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u044F</b>";
         strings["wifiSettings"] = "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u0435\u0442\u0438";
+        strings["loadFailed"] = "\u0412\u043E \u0432\u0440\u0435\u043C\u044F \u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0438 \u043F\u0440\u043E\u0438\u0437\u043E\u0448\u043B\u0430 \u043E\u0448\u0438\u0431\u043A\u0430. \u0414\u0430\u043D\u043D\u044B\u0435 \u043D\u0435 \u0431\u044B\u043B\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B.";
     })(strings || (strings = {}));
     const links = {
         appOwnerSite: "www.zarnitza.ru"
@@ -1493,6 +1494,7 @@ var app = (function () {
             const crc = this.calculateMessageCrc16(writeMessage);
             writeMessage[4] = crc[0];
             writeMessage[5] = crc[1];
+            console.log(writeMessage);
             return writeMessage;
         }
         static errorMessage() {
@@ -1779,7 +1781,7 @@ var app = (function () {
                 else
                     uri.protocol = "ws:";
                 uri.pathname += 'subscribe/' + this.serialNumber;
-                this.socket = new WebSocket(uri);
+                this.socket = new WebSocket('ws://192.168.137.5/ws');
                 console.debug("socket created");
                 this.socket.onopen = () => {
                     console.debug("socket connected");
@@ -1795,17 +1797,13 @@ var app = (function () {
             if (!this.socket)
                 return;
             this.socket.close();
+            console.debug('socket closed');
             this.socket.onmessage = null;
             this.socket = undefined;
             this.socketIsActive = false;
         }
         async getFactorySettings() {
             try {
-                // const result = await fetchGet(apiBase + 'factory-settings/' + this.serialNumber)
-                // if (result.ok == false)
-                //     return Promise.reject(result.status)
-                // const response = await result.json()
-                // return response as FactorySettings;
                 const response = await this.sendCommand(Commands.getFactorySettings());
                 return ResponseParser.parseFactorySettings(response);
             }
@@ -1815,15 +1813,6 @@ var app = (function () {
         }
         async getLabType() {
             try {
-                // const result = await fetchGet(apiBase + 'lab-type/' + this.serialNumber)
-                // if (result.ok == false)
-                //     return Promise.reject(result.status)
-                // const response = await result.text()
-                // const labType = Number(response)
-                // if (isNaN(labType))
-                //     return LabType.None
-                //
-                // return labType as LabType;
                 const response = await this.sendCommand(Commands.getInfo());
                 return ResponseParser.parseLabType(response);
             }
@@ -1838,11 +1827,6 @@ var app = (function () {
         }
         async getUserSettings(labType) {
             try {
-                // const result = await fetchGet(apiBase + 'user-settings/' + this.serialNumber)
-                // if (result.ok == false)
-                //     return Promise.reject(result.status)
-                // const response = await result.json()
-                // return response as UserSettings;
                 const response = await this.sendCommand(Commands.getUserSettings(0, 52));
                 return ResponseParser.parseUserSettings(labType, response);
             }
@@ -1877,7 +1861,9 @@ var app = (function () {
         }
         async onMessage(event) {
             const data = event.data;
-            this.rawValues = ResponseParser.ParseRawValues(await data.arrayBuffer());
+            const arrayBuffer = await data.arrayBuffer();
+            console.debug(arrayBuffer);
+            this.rawValues = ResponseParser.ParseRawValues(arrayBuffer);
         }
         onSocketClose() {
             console.debug("socketClosed. socketIsActive: ", this.socketIsActive);
@@ -1896,6 +1882,21 @@ var app = (function () {
             if (!byteValues)
                 return {};
             return ResponseParser.ParseRawValues(byteValues);
+        }
+        async getArchiveValues(id) {
+            const response = await fetch(`${apiBase}upload-archive/${id}`);
+            if (response.ok == false)
+                return null;
+            return await response.json();
+        }
+        async saveArchiveValues(archiveValues) {
+            const response = await fetch(`${apiBase}upload-archive`, {
+                body: JSON.stringify(archiveValues),
+                method: 'POST'
+            });
+            if (!response.ok)
+                return null;
+            return response.text();
         }
     }
 
@@ -2201,7 +2202,7 @@ var app = (function () {
     }
 
     // (145:16) {#if crosshairValues[i] !== null}
-    function create_if_block$3(ctx) {
+    function create_if_block$4(ctx) {
     	let span;
     	let t0_value = SENSORS_PREFERENCES.get(/*sensorValues*/ ctx[26].sensorType).name + "";
     	let t0;
@@ -2248,7 +2249,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(145:16) {#if crosshairValues[i] !== null}",
     		ctx
@@ -2260,7 +2261,7 @@ var app = (function () {
     // (144:12) {#each archiveValues.sensorsArchiveValues as sensorValues, i}
     function create_each_block$5(ctx) {
     	let if_block_anchor;
-    	let if_block = /*crosshairValues*/ ctx[6][/*i*/ ctx[28]] !== null && create_if_block$3(ctx);
+    	let if_block = /*crosshairValues*/ ctx[6][/*i*/ ctx[28]] !== null && create_if_block$4(ctx);
 
     	const block = {
     		c: function create() {
@@ -2276,7 +2277,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$3(ctx);
+    					if_block = create_if_block$4(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -2862,45 +2863,45 @@ var app = (function () {
     }
 
     /* src\components\DataTable.svelte generated by Svelte v3.48.0 */
-
     const file$i = "src\\components\\DataTable.svelte";
 
     function get_each_context$4(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[8] = list[i];
+    	child_ctx[9] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[11] = list[i];
+    	child_ctx[12] = list[i];
+    	child_ctx[14] = i;
     	return child_ctx;
     }
 
     function get_each_context_2$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[14] = list[i];
+    	child_ctx[15] = list[i];
     	return child_ctx;
     }
 
-    // (34:16) {#each headers as header}
+    // (35:16) {#each headers as header}
     function create_each_block_2$1(ctx) {
     	let td;
-    	let t_value = /*header*/ ctx[14] + "";
+    	let t_value = /*header*/ ctx[15] + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			add_location(td, file$i, 34, 20, 737);
+    			add_location(td, file$i, 35, 20, 841);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
     			append_dev(td, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*headers*/ 2 && t_value !== (t_value = /*header*/ ctx[14] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*headers*/ 4 && t_value !== (t_value = /*header*/ ctx[15] + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(td);
@@ -2911,31 +2912,31 @@ var app = (function () {
     		block,
     		id: create_each_block_2$1.name,
     		type: "each",
-    		source: "(34:16) {#each headers as header}",
+    		source: "(35:16) {#each headers as header}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (42:20) {#each row as col}
-    function create_each_block_1$2(ctx) {
+    // (48:24) {:else }
+    function create_else_block$1(ctx) {
     	let td;
-    	let t_value = /*col*/ ctx[11] + "";
+    	let t_value = /*cell*/ ctx[12] + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			td = element("td");
     			t = text(t_value);
-    			add_location(td, file$i, 42, 24, 971);
+    			add_location(td, file$i, 48, 28, 1357);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
     			append_dev(td, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*rows*/ 1 && t_value !== (t_value = /*col*/ ctx[11] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*paused, rowsSnapshot, rows*/ 19 && t_value !== (t_value = /*cell*/ ctx[12] + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(td);
@@ -2944,20 +2945,137 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$2.name,
-    		type: "each",
-    		source: "(42:20) {#each row as col}",
+    		id: create_else_block$1.name,
+    		type: "else",
+    		source: "(48:24) {:else }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (40:12) {#each rows as row (row[0])}
+    // (46:49) 
+    function create_if_block_1$2(ctx) {
+    	let td;
+    	let t_value = msToString(/*cell*/ ctx[12]) + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			td = element("td");
+    			t = text(t_value);
+    			add_location(td, file$i, 46, 28, 1266);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, td, anchor);
+    			append_dev(td, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*paused, rowsSnapshot, rows*/ 19 && t_value !== (t_value = msToString(/*cell*/ ctx[12]) + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(td);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(46:49) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (44:24) {#if (cell == null)}
+    function create_if_block$3(ctx) {
+    	let td;
+
+    	const block = {
+    		c: function create() {
+    			td = element("td");
+    			td.textContent = `${strings$1.noData}`;
+    			add_location(td, file$i, 44, 28, 1160);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, td, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(td);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(44:24) {#if (cell == null)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (43:20) {#each row as cell, colIdx}
+    function create_each_block_1$2(ctx) {
+    	let if_block_anchor;
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*cell*/ ctx[12] == null) return create_if_block$3;
+    		if (/*colIdx*/ ctx[14] === 0) return create_if_block_1$2;
+    		return create_else_block$1;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block = current_block_type(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$2.name,
+    		type: "each",
+    		source: "(43:20) {#each row as cell, colIdx}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (41:12) {#each (paused ? rowsSnapshot : rows) as row (row[0])}
     function create_each_block$4(key_1, ctx) {
     	let tr;
     	let t;
-    	let each_value_1 = /*row*/ ctx[8];
+    	let each_value_1 = /*row*/ ctx[9];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -2976,7 +3094,7 @@ var app = (function () {
     			}
 
     			t = space();
-    			add_location(tr, file$i, 40, 16, 901);
+    			add_location(tr, file$i, 41, 16, 1031);
     			this.first = tr;
     		},
     		m: function mount(target, anchor) {
@@ -2991,8 +3109,8 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*rows*/ 1) {
-    				each_value_1 = /*row*/ ctx[8];
+    			if (dirty & /*strings, paused, rowsSnapshot, rows, msToString*/ 19) {
+    				each_value_1 = /*row*/ ctx[9];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -3025,7 +3143,7 @@ var app = (function () {
     		block,
     		id: create_each_block$4.name,
     		type: "each",
-    		source: "(40:12) {#each rows as row (row[0])}",
+    		source: "(41:12) {#each (paused ? rowsSnapshot : rows) as row (row[0])}",
     		ctx
     	});
 
@@ -3042,7 +3160,7 @@ var app = (function () {
     	let tbody;
     	let each_blocks = [];
     	let each1_lookup = new Map();
-    	let each_value_2 = /*headers*/ ctx[1];
+    	let each_value_2 = /*headers*/ ctx[2];
     	validate_each_argument(each_value_2);
     	let each_blocks_1 = [];
 
@@ -3050,9 +3168,12 @@ var app = (function () {
     		each_blocks_1[i] = create_each_block_2$1(get_each_context_2$1(ctx, each_value_2, i));
     	}
 
-    	let each_value = /*rows*/ ctx[0];
+    	let each_value = /*paused*/ ctx[4]
+    	? /*rowsSnapshot*/ ctx[1]
+    	: /*rows*/ ctx[0];
+
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*row*/ ctx[8][0];
+    	const get_key = ctx => /*row*/ ctx[9][0];
     	validate_each_keys(ctx, each_value, get_each_context$4, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -3080,15 +3201,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(tr, file$i, 32, 12, 668);
-    			add_location(thead, file$i, 31, 12, 647);
-    			add_location(tbody, file$i, 38, 12, 834);
-    			add_location(table, file$i, 30, 8, 626);
+    			add_location(tr, file$i, 33, 12, 772);
+    			add_location(thead, file$i, 32, 12, 751);
+    			add_location(tbody, file$i, 39, 12, 938);
+    			add_location(table, file$i, 31, 8, 730);
     			attr_dev(div0, "class", "scroll");
-    			add_location(div0, file$i, 28, 4, 594);
+    			add_location(div0, file$i, 29, 4, 698);
     			attr_dev(div1, "class", "table-wrapper");
-    			toggle_class(div1, "hidden", !/*isVisible*/ ctx[2]);
-    			add_location(div1, file$i, 27, 0, 535);
+    			toggle_class(div1, "hidden", !/*isVisible*/ ctx[3]);
+    			add_location(div1, file$i, 28, 0, 639);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3112,8 +3233,8 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*headers*/ 2) {
-    				each_value_2 = /*headers*/ ctx[1];
+    			if (dirty & /*headers*/ 4) {
+    				each_value_2 = /*headers*/ ctx[2];
     				validate_each_argument(each_value_2);
     				let i;
 
@@ -3136,15 +3257,18 @@ var app = (function () {
     				each_blocks_1.length = each_value_2.length;
     			}
 
-    			if (dirty & /*rows*/ 1) {
-    				each_value = /*rows*/ ctx[0];
+    			if (dirty & /*paused, rowsSnapshot, rows, strings, msToString*/ 19) {
+    				each_value = /*paused*/ ctx[4]
+    				? /*rowsSnapshot*/ ctx[1]
+    				: /*rows*/ ctx[0];
+
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context$4, get_key);
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each1_lookup, tbody, destroy_block, create_each_block$4, null, get_each_context$4);
     			}
 
-    			if (dirty & /*isVisible*/ 4) {
-    				toggle_class(div1, "hidden", !/*isVisible*/ ctx[2]);
+    			if (dirty & /*isVisible*/ 8) {
+    				toggle_class(div1, "hidden", !/*isVisible*/ ctx[3]);
     			}
     		},
     		i: noop,
@@ -3174,6 +3298,7 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('DataTable', slots, []);
     	let { rows = [] } = $$props;
+    	let { rowsSnapshot = [] } = $$props;
     	let { headers = [] } = $$props;
     	let { isVisible = true } = $$props;
 
@@ -3183,20 +3308,21 @@ var app = (function () {
     	let paused = false;
 
     	function addRow(newRow) {
-    		if (paused) tempRows.push(newRow); else $$invalidate(0, rows = [newRow, ...rows]);
+    		$$invalidate(0, rows = [newRow, ...rows]);
     	}
 
     	function pause() {
-    		paused = true;
+    		$$invalidate(1, rowsSnapshot = rows.slice());
+    		$$invalidate(4, paused = true);
     	}
 
     	function start() {
     		$$invalidate(0, rows = [...tempRows.reverse(), ...rows]);
-    		tempRows = [];
-    		paused = false;
+    		$$invalidate(1, rowsSnapshot = []);
+    		$$invalidate(4, paused = false);
     	}
 
-    	const writable_props = ['rows', 'headers', 'isVisible'];
+    	const writable_props = ['rows', 'rowsSnapshot', 'headers', 'isVisible'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<DataTable> was created with unknown prop '${key}'`);
@@ -3204,12 +3330,16 @@ var app = (function () {
 
     	$$self.$$set = $$props => {
     		if ('rows' in $$props) $$invalidate(0, rows = $$props.rows);
-    		if ('headers' in $$props) $$invalidate(1, headers = $$props.headers);
-    		if ('isVisible' in $$props) $$invalidate(2, isVisible = $$props.isVisible);
+    		if ('rowsSnapshot' in $$props) $$invalidate(1, rowsSnapshot = $$props.rowsSnapshot);
+    		if ('headers' in $$props) $$invalidate(2, headers = $$props.headers);
+    		if ('isVisible' in $$props) $$invalidate(3, isVisible = $$props.isVisible);
     	};
 
     	$$self.$capture_state = () => ({
+    		strings: strings$1,
+    		msToString,
     		rows,
+    		rowsSnapshot,
     		headers,
     		isVisible,
     		tempRows,
@@ -3221,17 +3351,18 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('rows' in $$props) $$invalidate(0, rows = $$props.rows);
-    		if ('headers' in $$props) $$invalidate(1, headers = $$props.headers);
-    		if ('isVisible' in $$props) $$invalidate(2, isVisible = $$props.isVisible);
+    		if ('rowsSnapshot' in $$props) $$invalidate(1, rowsSnapshot = $$props.rowsSnapshot);
+    		if ('headers' in $$props) $$invalidate(2, headers = $$props.headers);
+    		if ('isVisible' in $$props) $$invalidate(3, isVisible = $$props.isVisible);
     		if ('tempRows' in $$props) tempRows = $$props.tempRows;
-    		if ('paused' in $$props) paused = $$props.paused;
+    		if ('paused' in $$props) $$invalidate(4, paused = $$props.paused);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [rows, headers, isVisible, addRow, pause, start];
+    	return [rows, rowsSnapshot, headers, isVisible, paused, addRow, pause, start];
     }
 
     class DataTable extends SvelteComponentDev {
@@ -3240,11 +3371,12 @@ var app = (function () {
 
     		init(this, options, instance$l, create_fragment$l, safe_not_equal, {
     			rows: 0,
-    			headers: 1,
-    			isVisible: 2,
-    			addRow: 3,
-    			pause: 4,
-    			start: 5
+    			rowsSnapshot: 1,
+    			headers: 2,
+    			isVisible: 3,
+    			addRow: 5,
+    			pause: 6,
+    			start: 7
     		});
 
     		dispatch_dev("SvelteRegisterComponent", {
@@ -3260,6 +3392,14 @@ var app = (function () {
     	}
 
     	set rows(value) {
+    		throw new Error("<DataTable>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get rowsSnapshot() {
+    		throw new Error("<DataTable>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set rowsSnapshot(value) {
     		throw new Error("<DataTable>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -3280,7 +3420,7 @@ var app = (function () {
     	}
 
     	get addRow() {
-    		return this.$$.ctx[3];
+    		return this.$$.ctx[5];
     	}
 
     	set addRow(value) {
@@ -3288,7 +3428,7 @@ var app = (function () {
     	}
 
     	get pause() {
-    		return this.$$.ctx[4];
+    		return this.$$.ctx[6];
     	}
 
     	set pause(value) {
@@ -3296,7 +3436,7 @@ var app = (function () {
     	}
 
     	get start() {
-    		return this.$$.ctx[5];
+    		return this.$$.ctx[7];
     	}
 
     	set start(value) {
@@ -3998,6 +4138,7 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SavedDataScreen', slots, []);
     	let { repository } = $$props;
+    	let { id } = $$props;
 
     	// Internal
     	const archiveValues = {
@@ -4031,7 +4172,7 @@ var app = (function () {
     		]
     	};
 
-    	const writable_props = ['repository'];
+    	const writable_props = ['repository', 'id'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<SavedDataScreen> was created with unknown prop '${key}'`);
@@ -4039,30 +4180,33 @@ var app = (function () {
 
     	$$self.$$set = $$props => {
     		if ('repository' in $$props) $$invalidate(1, repository = $$props.repository);
+    		if ('id' in $$props) $$invalidate(2, id = $$props.id);
     	};
 
     	$$self.$capture_state = () => ({
     		SavedDataView,
     		SensorType,
     		repository,
+    		id,
     		archiveValues
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('repository' in $$props) $$invalidate(1, repository = $$props.repository);
+    		if ('id' in $$props) $$invalidate(2, id = $$props.id);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [archiveValues, repository];
+    	return [archiveValues, repository, id];
     }
 
     class SavedDataScreen extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$j, create_fragment$j, safe_not_equal, { repository: 1 });
+    		init(this, options, instance$j, create_fragment$j, safe_not_equal, { repository: 1, id: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -4077,6 +4221,10 @@ var app = (function () {
     		if (/*repository*/ ctx[1] === undefined && !('repository' in props)) {
     			console.warn("<SavedDataScreen> was created without expected prop 'repository'");
     		}
+
+    		if (/*id*/ ctx[2] === undefined && !('id' in props)) {
+    			console.warn("<SavedDataScreen> was created without expected prop 'id'");
+    		}
     	}
 
     	get repository() {
@@ -4084,6 +4232,14 @@ var app = (function () {
     	}
 
     	set repository(value) {
+    		throw new Error("<SavedDataScreen>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get id() {
+    		throw new Error("<SavedDataScreen>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set id(value) {
     		throw new Error("<SavedDataScreen>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -10438,46 +10594,55 @@ var app = (function () {
     	}
     }
 
+    function rowsToColumns(rows) {
+        const colCount = rows[0].length;
+        const result = Array(colCount);
+        for (let colIdx = 0; colIdx < colCount; colIdx++) {
+            result[colIdx] = rows.map(r => r[colIdx]);
+        }
+        return result;
+    }
+
     /* src\views\DashboardView.svelte generated by Svelte v3.48.0 */
     const file$1 = "src\\views\\DashboardView.svelte";
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[25] = list[i];
-    	child_ctx[26] = list;
-    	child_ctx[27] = i;
+    	child_ctx[30] = list[i];
+    	child_ctx[31] = list;
+    	child_ctx[32] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[25] = list[i];
-    	child_ctx[27] = i;
+    	child_ctx[30] = list[i];
+    	child_ctx[32] = i;
     	return child_ctx;
     }
 
-    // (99:12) {#each sensors as sensor, i}
+    // (112:12) {#each sensors as sensor, i}
     function create_each_block_1(ctx) {
     	let sidebarsensor;
     	let current;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[19](/*i*/ ctx[27]);
+    		return /*click_handler*/ ctx[22](/*i*/ ctx[32]);
     	}
 
     	function applyMinMax_handler(...args) {
-    		return /*applyMinMax_handler*/ ctx[20](/*i*/ ctx[27], ...args);
+    		return /*applyMinMax_handler*/ ctx[23](/*i*/ ctx[32], ...args);
     	}
 
     	sidebarsensor = new SidebarSensor({
     			props: {
-    				value: /*values*/ ctx[7][/*i*/ ctx[27]] ?? strings$1.noData,
-    				selected: /*selectedIdx*/ ctx[2] === /*i*/ ctx[27],
-    				maxValue: /*sensor*/ ctx[25].mode.maxValue,
-    				minValue: /*sensor*/ ctx[25].mode.minValue,
-    				label: /*sensor*/ ctx[25].name,
-    				icon: /*sensor*/ ctx[25].ico,
-    				unit: /*sensor*/ ctx[25].mode.unit
+    				value: /*values*/ ctx[8][/*i*/ ctx[32]] ?? strings$1.noData,
+    				selected: /*selectedIdx*/ ctx[3] === /*i*/ ctx[32],
+    				maxValue: /*sensor*/ ctx[30].mode.maxValue,
+    				minValue: /*sensor*/ ctx[30].mode.minValue,
+    				label: /*sensor*/ ctx[30].name,
+    				icon: /*sensor*/ ctx[30].ico,
+    				unit: /*sensor*/ ctx[30].mode.unit
     			},
     			$$inline: true
     		});
@@ -10496,13 +10661,13 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
     			const sidebarsensor_changes = {};
-    			if (dirty & /*values*/ 128) sidebarsensor_changes.value = /*values*/ ctx[7][/*i*/ ctx[27]] ?? strings$1.noData;
-    			if (dirty & /*selectedIdx*/ 4) sidebarsensor_changes.selected = /*selectedIdx*/ ctx[2] === /*i*/ ctx[27];
-    			if (dirty & /*sensors*/ 1) sidebarsensor_changes.maxValue = /*sensor*/ ctx[25].mode.maxValue;
-    			if (dirty & /*sensors*/ 1) sidebarsensor_changes.minValue = /*sensor*/ ctx[25].mode.minValue;
-    			if (dirty & /*sensors*/ 1) sidebarsensor_changes.label = /*sensor*/ ctx[25].name;
-    			if (dirty & /*sensors*/ 1) sidebarsensor_changes.icon = /*sensor*/ ctx[25].ico;
-    			if (dirty & /*sensors*/ 1) sidebarsensor_changes.unit = /*sensor*/ ctx[25].mode.unit;
+    			if (dirty[0] & /*values*/ 256) sidebarsensor_changes.value = /*values*/ ctx[8][/*i*/ ctx[32]] ?? strings$1.noData;
+    			if (dirty[0] & /*selectedIdx*/ 8) sidebarsensor_changes.selected = /*selectedIdx*/ ctx[3] === /*i*/ ctx[32];
+    			if (dirty[0] & /*sensors*/ 1) sidebarsensor_changes.maxValue = /*sensor*/ ctx[30].mode.maxValue;
+    			if (dirty[0] & /*sensors*/ 1) sidebarsensor_changes.minValue = /*sensor*/ ctx[30].mode.minValue;
+    			if (dirty[0] & /*sensors*/ 1) sidebarsensor_changes.label = /*sensor*/ ctx[30].name;
+    			if (dirty[0] & /*sensors*/ 1) sidebarsensor_changes.icon = /*sensor*/ ctx[30].ico;
+    			if (dirty[0] & /*sensors*/ 1) sidebarsensor_changes.unit = /*sensor*/ ctx[30].mode.unit;
     			sidebarsensor.$set(sidebarsensor_changes);
     		},
     		i: function intro(local) {
@@ -10523,25 +10688,25 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(99:12) {#each sensors as sensor, i}",
+    		source: "(112:12) {#each sensors as sensor, i}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (142:12) {#each sensors as sensor, i}
+    // (158:12) {#each sensors as sensor, i}
     function create_each_block(ctx) {
     	let sensorchart;
-    	let i = /*i*/ ctx[27];
+    	let i = /*i*/ ctx[32];
     	let current;
-    	const assign_sensorchart = () => /*sensorchart_binding*/ ctx[22](sensorchart, i);
-    	const unassign_sensorchart = () => /*sensorchart_binding*/ ctx[22](null, i);
+    	const assign_sensorchart = () => /*sensorchart_binding*/ ctx[26](sensorchart, i);
+    	const unassign_sensorchart = () => /*sensorchart_binding*/ ctx[26](null, i);
 
     	let sensorchart_props = {
-    		isVisible: /*i*/ ctx[27] === /*selectedIdx*/ ctx[2] && /*dataDisplay*/ ctx[1] === DataDisplay.Graphics,
-    		sensor: /*sensor*/ ctx[25],
-    		numberOfVisiblePoints: /*numberOfVisiblePoints*/ ctx[9]
+    		isVisible: /*i*/ ctx[32] === /*selectedIdx*/ ctx[3] && /*dataDisplay*/ ctx[2] === DataDisplay.Graphics,
+    		sensor: /*sensor*/ ctx[30],
+    		numberOfVisiblePoints: /*numberOfVisiblePoints*/ ctx[11]
     	};
 
     	sensorchart = new SensorChart({ props: sensorchart_props, $$inline: true });
@@ -10556,16 +10721,16 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (i !== /*i*/ ctx[27]) {
+    			if (i !== /*i*/ ctx[32]) {
     				unassign_sensorchart();
-    				i = /*i*/ ctx[27];
+    				i = /*i*/ ctx[32];
     				assign_sensorchart();
     			}
 
     			const sensorchart_changes = {};
-    			if (dirty & /*selectedIdx, dataDisplay*/ 6) sensorchart_changes.isVisible = /*i*/ ctx[27] === /*selectedIdx*/ ctx[2] && /*dataDisplay*/ ctx[1] === DataDisplay.Graphics;
-    			if (dirty & /*sensors*/ 1) sensorchart_changes.sensor = /*sensor*/ ctx[25];
-    			if (dirty & /*numberOfVisiblePoints*/ 512) sensorchart_changes.numberOfVisiblePoints = /*numberOfVisiblePoints*/ ctx[9];
+    			if (dirty[0] & /*selectedIdx, dataDisplay*/ 12) sensorchart_changes.isVisible = /*i*/ ctx[32] === /*selectedIdx*/ ctx[3] && /*dataDisplay*/ ctx[2] === DataDisplay.Graphics;
+    			if (dirty[0] & /*sensors*/ 1) sensorchart_changes.sensor = /*sensor*/ ctx[30];
+    			if (dirty[0] & /*numberOfVisiblePoints*/ 2048) sensorchart_changes.numberOfVisiblePoints = /*numberOfVisiblePoints*/ ctx[11];
     			sensorchart.$set(sensorchart_changes);
     		},
     		i: function intro(local) {
@@ -10587,7 +10752,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(142:12) {#each sensors as sensor, i}",
+    		source: "(158:12) {#each sensors as sensor, i}",
     		ctx
     	});
 
@@ -10609,7 +10774,7 @@ var app = (function () {
     	let t3;
     	let h1;
 
-    	let t4_value = (/*dataDisplay*/ ctx[1] === DataDisplay.Measures
+    	let t4_value = (/*dataDisplay*/ ctx[2] === DataDisplay.Measures
     	? strings$1.measuresTitle
     	: strings$1.graphicsTitle) + "";
 
@@ -10619,6 +10784,7 @@ var app = (function () {
     	let button0;
     	let img0;
     	let img0_src_value;
+    	let button0_disabled_value;
     	let t6;
     	let button1;
     	let img1;
@@ -10627,7 +10793,6 @@ var app = (function () {
     	let button2;
     	let img2;
     	let img2_src_value;
-    	let button2_disabled_value;
     	let t8;
     	let button3;
     	let img3;
@@ -10639,9 +10804,15 @@ var app = (function () {
     	let img4_src_value;
     	let button4_disabled_value;
     	let t10;
-    	let div5;
+    	let button5;
+    	let img5;
+    	let img5_src_value;
+    	let button5_disabled_value;
     	let t11;
+    	let div5;
+    	let t12;
     	let sensorstable;
+    	let updating_rows;
     	let current;
     	let mounted;
     	let dispose;
@@ -10659,7 +10830,7 @@ var app = (function () {
     	});
 
     	backbutton = new BackButton({ $$inline: true });
-    	backbutton.$on("click", /*goBack*/ ctx[13]);
+    	backbutton.$on("click", /*goBack*/ ctx[16]);
     	let each_value = /*sensors*/ ctx[0];
     	validate_each_argument(each_value);
     	let each_blocks = [];
@@ -10672,14 +10843,23 @@ var app = (function () {
     		each_blocks[i] = null;
     	});
 
-    	let sensorstable_props = { headers: /*tableHeader*/ ctx[8] };
+    	function sensorstable_rows_binding(value) {
+    		/*sensorstable_rows_binding*/ ctx[28](value);
+    	}
+
+    	let sensorstable_props = { headers: /*tableHeader*/ ctx[10] };
+
+    	if (/*tableRows*/ ctx[9] !== void 0) {
+    		sensorstable_props.rows = /*tableRows*/ ctx[9];
+    	}
 
     	sensorstable = new DataTable({
     			props: sensorstable_props,
     			$$inline: true
     		});
 
-    	/*sensorstable_binding*/ ctx[23](sensorstable);
+    	/*sensorstable_binding*/ ctx[27](sensorstable);
+    	binding_callbacks.push(() => bind(sensorstable, 'rows', sensorstable_rows_binding));
 
     	const block = {
     		c: function create() {
@@ -10719,64 +10899,71 @@ var app = (function () {
     			button4 = element("button");
     			img4 = element("img");
     			t10 = space();
+    			button5 = element("button");
+    			img5 = element("img");
+    			t11 = space();
     			div5 = element("div");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t11 = space();
+    			t12 = space();
     			create_component(sensorstable.$$.fragment);
     			attr_dev(div0, "class", "sidebar-sensor-list svelte-176y4vc");
-    			add_location(div0, file$1, 97, 8, 3143);
+    			add_location(div0, file$1, 110, 8, 3534);
     			attr_dev(div1, "class", "column sidebar svelte-176y4vc");
-    			add_location(div1, file$1, 95, 4, 3088);
+    			add_location(div1, file$1, 108, 4, 3479);
     			attr_dev(div2, "class", "header__back-button svelte-176y4vc");
-    			add_location(div2, file$1, 112, 12, 3816);
+    			add_location(div2, file$1, 125, 12, 4207);
     			attr_dev(h1, "class", "header__title svelte-176y4vc");
-    			add_location(h1, file$1, 117, 12, 3936);
+    			add_location(h1, file$1, 130, 12, 4327);
+    			if (!src_url_equal(img0.src, img0_src_value = "/img/ico_download.png")) attr_dev(img0, "src", img0_src_value);
+    			add_location(img0, file$1, 136, 20, 4625);
+    			button0.disabled = button0_disabled_value = !/*saveData*/ ctx[1];
+    			add_location(button0, file$1, 135, 16, 4543);
 
-    			if (!src_url_equal(img0.src, img0_src_value = /*paused*/ ctx[3]
+    			if (!src_url_equal(img1.src, img1_src_value = /*paused*/ ctx[4]
     			? "/img/ico_start.png"
-    			: "/img/ico_pause.png")) attr_dev(img0, "src", img0_src_value);
+    			: "/img/ico_pause.png")) attr_dev(img1, "src", img1_src_value);
 
-    			add_location(img0, file$1, 123, 20, 4255);
-    			attr_dev(button0, "class", "play-pause");
-    			button0.disabled = /*stopped*/ ctx[4];
-    			add_location(button0, file$1, 122, 16, 4152);
+    			add_location(img1, file$1, 139, 20, 4808);
+    			attr_dev(button1, "class", "play-pause");
+    			button1.disabled = /*stopped*/ ctx[5];
+    			add_location(button1, file$1, 138, 16, 4705);
 
-    			if (!src_url_equal(img1.src, img1_src_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures
+    			if (!src_url_equal(img2.src, img2_src_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures
     			? "/img/ico_measure.png"
-    			: "/img/ico_graphics.png")) attr_dev(img1, "src", img1_src_value);
+    			: "/img/ico_graphics.png")) attr_dev(img2, "src", img2_src_value);
 
-    			add_location(img1, file$1, 126, 20, 4452);
-    			attr_dev(button1, "class", "measure-graphics");
-    			add_location(button1, file$1, 125, 16, 4364);
-    			if (!src_url_equal(img2.src, img2_src_value = "/img/ico_zoom.png")) attr_dev(img2, "src", img2_src_value);
-    			attr_dev(img2, "alt", "zoom");
-    			add_location(img2, file$1, 129, 20, 4715);
-    			button2.disabled = button2_disabled_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures;
-    			add_location(button2, file$1, 128, 16, 4596);
-    			if (!src_url_equal(img3.src, img3_src_value = "/img/ico_zoom_out.png")) attr_dev(img3, "src", img3_src_value);
-    			attr_dev(img3, "alt", "zoom_out");
-    			add_location(img3, file$1, 132, 20, 4917);
-    			button3.disabled = button3_disabled_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures;
-    			add_location(button3, file$1, 131, 16, 4800);
-    			if (!src_url_equal(img4.src, img4_src_value = "/img/ico_zoom_in.png")) attr_dev(img4, "src", img4_src_value);
-    			attr_dev(img4, "alt", "zoom_in");
-    			add_location(img4, file$1, 135, 20, 5126);
-    			button4.disabled = button4_disabled_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures;
-    			add_location(button4, file$1, 134, 16, 5010);
+    			add_location(img2, file$1, 142, 20, 5005);
+    			attr_dev(button2, "class", "measure-graphics");
+    			add_location(button2, file$1, 141, 16, 4917);
+    			if (!src_url_equal(img3.src, img3_src_value = "/img/ico_zoom.png")) attr_dev(img3, "src", img3_src_value);
+    			attr_dev(img3, "alt", "zoom");
+    			add_location(img3, file$1, 145, 20, 5268);
+    			button3.disabled = button3_disabled_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures;
+    			add_location(button3, file$1, 144, 16, 5149);
+    			if (!src_url_equal(img4.src, img4_src_value = "/img/ico_zoom_out.png")) attr_dev(img4, "src", img4_src_value);
+    			attr_dev(img4, "alt", "zoom_out");
+    			add_location(img4, file$1, 148, 20, 5470);
+    			button4.disabled = button4_disabled_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures;
+    			add_location(button4, file$1, 147, 16, 5353);
+    			if (!src_url_equal(img5.src, img5_src_value = "/img/ico_zoom_in.png")) attr_dev(img5, "src", img5_src_value);
+    			attr_dev(img5, "alt", "zoom_in");
+    			add_location(img5, file$1, 151, 20, 5679);
+    			button5.disabled = button5_disabled_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures;
+    			add_location(button5, file$1, 150, 16, 5563);
     			attr_dev(div3, "class", "row control-buttons");
-    			add_location(div3, file$1, 121, 12, 4101);
+    			add_location(div3, file$1, 134, 12, 4492);
     			attr_dev(div4, "class", "header svelte-176y4vc");
-    			add_location(div4, file$1, 111, 8, 3782);
+    			add_location(div4, file$1, 124, 8, 4173);
     			attr_dev(div5, "class", "charts-wrapper svelte-176y4vc");
-    			add_location(div5, file$1, 140, 8, 5247);
+    			add_location(div5, file$1, 156, 8, 5800);
     			attr_dev(div6, "class", "column work-screen svelte-176y4vc");
-    			add_location(div6, file$1, 109, 4, 3738);
+    			add_location(div6, file$1, 122, 4, 4129);
     			attr_dev(main, "class", "full row");
-    			add_location(main, file$1, 94, 0, 3059);
+    			add_location(main, file$1, 107, 0, 3450);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10817,36 +11004,30 @@ var app = (function () {
     			append_dev(div3, t9);
     			append_dev(div3, button4);
     			append_dev(button4, img4);
-    			append_dev(div6, t10);
+    			append_dev(div3, t10);
+    			append_dev(div3, button5);
+    			append_dev(button5, img5);
+    			append_dev(div6, t11);
     			append_dev(div6, div5);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div5, null);
     			}
 
-    			append_dev(div5, t11);
+    			append_dev(div5, t12);
     			mount_component(sensorstable, div5, null);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*click_handler_1*/ ctx[21], false, false, false),
-    					listen_dev(button1, "click", /*toggleMeasureGraphics*/ ctx[11], false, false, false),
-    					listen_dev(
-    						button2,
-    						"click",
-    						function () {
-    							if (is_function(/*charts*/ ctx[5][/*selectedIdx*/ ctx[2]].resetZoom)) /*charts*/ ctx[5][/*selectedIdx*/ ctx[2]].resetZoom.apply(this, arguments);
-    						},
-    						false,
-    						false,
-    						false
-    					),
+    					listen_dev(button0, "click", /*click_handler_1*/ ctx[24], false, false, false),
+    					listen_dev(button1, "click", /*click_handler_2*/ ctx[25], false, false, false),
+    					listen_dev(button2, "click", /*toggleMeasureGraphics*/ ctx[13], false, false, false),
     					listen_dev(
     						button3,
     						"click",
     						function () {
-    							if (is_function(/*charts*/ ctx[5][/*selectedIdx*/ ctx[2]].zoomOut)) /*charts*/ ctx[5][/*selectedIdx*/ ctx[2]].zoomOut.apply(this, arguments);
+    							if (is_function(/*charts*/ ctx[6][/*selectedIdx*/ ctx[3]].resetZoom)) /*charts*/ ctx[6][/*selectedIdx*/ ctx[3]].resetZoom.apply(this, arguments);
     						},
     						false,
     						false,
@@ -10856,7 +11037,17 @@ var app = (function () {
     						button4,
     						"click",
     						function () {
-    							if (is_function(/*charts*/ ctx[5][/*selectedIdx*/ ctx[2]].zoomIn)) /*charts*/ ctx[5][/*selectedIdx*/ ctx[2]].zoomIn.apply(this, arguments);
+    							if (is_function(/*charts*/ ctx[6][/*selectedIdx*/ ctx[3]].zoomOut)) /*charts*/ ctx[6][/*selectedIdx*/ ctx[3]].zoomOut.apply(this, arguments);
+    						},
+    						false,
+    						false,
+    						false
+    					),
+    					listen_dev(
+    						button5,
+    						"click",
+    						function () {
+    							if (is_function(/*charts*/ ctx[6][/*selectedIdx*/ ctx[3]].zoomIn)) /*charts*/ ctx[6][/*selectedIdx*/ ctx[3]].zoomIn.apply(this, arguments);
     						},
     						false,
     						false,
@@ -10867,10 +11058,10 @@ var app = (function () {
     				mounted = true;
     			}
     		},
-    		p: function update(new_ctx, [dirty]) {
+    		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*values, strings, selectedIdx, sensors, selectSensor, charts*/ 4261) {
+    			if (dirty[0] & /*values, selectedIdx, sensors, selectSensor, charts*/ 16713) {
     				each_value_1 = /*sensors*/ ctx[0];
     				validate_each_argument(each_value_1);
     				let i;
@@ -10898,39 +11089,43 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if ((!current || dirty & /*dataDisplay*/ 2) && t4_value !== (t4_value = (/*dataDisplay*/ ctx[1] === DataDisplay.Measures
+    			if ((!current || dirty[0] & /*dataDisplay*/ 4) && t4_value !== (t4_value = (/*dataDisplay*/ ctx[2] === DataDisplay.Measures
     			? strings$1.measuresTitle
     			: strings$1.graphicsTitle) + "")) set_data_dev(t4, t4_value);
 
-    			if (!current || dirty & /*paused*/ 8 && !src_url_equal(img0.src, img0_src_value = /*paused*/ ctx[3]
+    			if (!current || dirty[0] & /*saveData*/ 2 && button0_disabled_value !== (button0_disabled_value = !/*saveData*/ ctx[1])) {
+    				prop_dev(button0, "disabled", button0_disabled_value);
+    			}
+
+    			if (!current || dirty[0] & /*paused*/ 16 && !src_url_equal(img1.src, img1_src_value = /*paused*/ ctx[4]
     			? "/img/ico_start.png"
     			: "/img/ico_pause.png")) {
-    				attr_dev(img0, "src", img0_src_value);
-    			}
-
-    			if (!current || dirty & /*stopped*/ 16) {
-    				prop_dev(button0, "disabled", /*stopped*/ ctx[4]);
-    			}
-
-    			if (!current || dirty & /*dataDisplay*/ 2 && !src_url_equal(img1.src, img1_src_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures
-    			? "/img/ico_measure.png"
-    			: "/img/ico_graphics.png")) {
     				attr_dev(img1, "src", img1_src_value);
     			}
 
-    			if (!current || dirty & /*dataDisplay*/ 2 && button2_disabled_value !== (button2_disabled_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures)) {
-    				prop_dev(button2, "disabled", button2_disabled_value);
+    			if (!current || dirty[0] & /*stopped*/ 32) {
+    				prop_dev(button1, "disabled", /*stopped*/ ctx[5]);
     			}
 
-    			if (!current || dirty & /*dataDisplay*/ 2 && button3_disabled_value !== (button3_disabled_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures)) {
+    			if (!current || dirty[0] & /*dataDisplay*/ 4 && !src_url_equal(img2.src, img2_src_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures
+    			? "/img/ico_measure.png"
+    			: "/img/ico_graphics.png")) {
+    				attr_dev(img2, "src", img2_src_value);
+    			}
+
+    			if (!current || dirty[0] & /*dataDisplay*/ 4 && button3_disabled_value !== (button3_disabled_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures)) {
     				prop_dev(button3, "disabled", button3_disabled_value);
     			}
 
-    			if (!current || dirty & /*dataDisplay*/ 2 && button4_disabled_value !== (button4_disabled_value = /*dataDisplay*/ ctx[1] === DataDisplay.Measures)) {
+    			if (!current || dirty[0] & /*dataDisplay*/ 4 && button4_disabled_value !== (button4_disabled_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures)) {
     				prop_dev(button4, "disabled", button4_disabled_value);
     			}
 
-    			if (dirty & /*selectedIdx, dataDisplay, DataDisplay, sensors, numberOfVisiblePoints, charts*/ 551) {
+    			if (!current || dirty[0] & /*dataDisplay*/ 4 && button5_disabled_value !== (button5_disabled_value = /*dataDisplay*/ ctx[2] === DataDisplay.Measures)) {
+    				prop_dev(button5, "disabled", button5_disabled_value);
+    			}
+
+    			if (dirty[0] & /*selectedIdx, dataDisplay, sensors, numberOfVisiblePoints, charts*/ 2125) {
     				each_value = /*sensors*/ ctx[0];
     				validate_each_argument(each_value);
     				let i;
@@ -10945,7 +11140,7 @@ var app = (function () {
     						each_blocks[i] = create_each_block(child_ctx);
     						each_blocks[i].c();
     						transition_in(each_blocks[i], 1);
-    						each_blocks[i].m(div5, t11);
+    						each_blocks[i].m(div5, t12);
     					}
     				}
 
@@ -10959,7 +11154,14 @@ var app = (function () {
     			}
 
     			const sensorstable_changes = {};
-    			if (dirty & /*tableHeader*/ 256) sensorstable_changes.headers = /*tableHeader*/ ctx[8];
+    			if (dirty[0] & /*tableHeader*/ 1024) sensorstable_changes.headers = /*tableHeader*/ ctx[10];
+
+    			if (!updating_rows && dirty[0] & /*tableRows*/ 512) {
+    				updating_rows = true;
+    				sensorstable_changes.rows = /*tableRows*/ ctx[9];
+    				add_flush_callback(() => updating_rows = false);
+    			}
+
     			sensorstable.$set(sensorstable_changes);
     		},
     		i: function intro(local) {
@@ -11004,7 +11206,7 @@ var app = (function () {
     			destroy_each(each_blocks_1, detaching);
     			destroy_component(backbutton);
     			destroy_each(each_blocks, detaching);
-    			/*sensorstable_binding*/ ctx[23](null);
+    			/*sensorstable_binding*/ ctx[27](null);
     			destroy_component(sensorstable);
     			mounted = false;
     			run_all(dispose);
@@ -11030,6 +11232,7 @@ var app = (function () {
     	let { sensors = [] } = $$props;
     	let { intervalMs = 250 } = $$props;
     	let { experimentTimeSeconds = 60 } = $$props;
+    	let { saveData = undefined } = $$props;
     	const dispatch = createEventDispatcher();
     	let dataDisplay = DataDisplay.Measures;
     	let selectedIdx = 0;
@@ -11038,6 +11241,7 @@ var app = (function () {
     	let charts = [];
     	let table = undefined;
     	const values = [];
+    	let tableRows = [];
 
     	onMount(() => {
     		let startTime = Date.now();
@@ -11062,11 +11266,11 @@ var app = (function () {
 
     				for (let i = 0; i < sensors.length; i++) {
     					const newValue = sensors[i].getLastValue();
-    					if (newValue == null) $$invalidate(7, values[i] = strings$1.noData, values); else $$invalidate(7, values[i] = newValue, values);
+    					$$invalidate(8, values[i] = newValue, values);
     					charts[i].addData({ time, value: newValue });
     				}
 
-    				table.addRow([msToString(time), ...values]);
+    				$$invalidate(9, tableRows = [[time, ...values], ...tableRows]);
     			},
     			intervalMs,
     			true
@@ -11080,7 +11284,7 @@ var app = (function () {
 
     	function setPause(isPaused) {
     		if (stopped && !isPaused) return;
-    		$$invalidate(3, paused = isPaused);
+    		$$invalidate(4, paused = isPaused);
 
     		if (paused) {
     			charts.forEach(c => c.pause());
@@ -11092,14 +11296,29 @@ var app = (function () {
     	}
 
     	function toggleMeasureGraphics() {
-    		$$invalidate(1, dataDisplay = dataDisplay === DataDisplay.Measures
+    		$$invalidate(2, dataDisplay = dataDisplay === DataDisplay.Measures
     		? DataDisplay.Graphics
     		: DataDisplay.Measures);
     	}
 
     	function selectSensor(idx) {
-    		$$invalidate(2, selectedIdx = idx);
-    		$$invalidate(1, dataDisplay = DataDisplay.Graphics);
+    		$$invalidate(3, selectedIdx = idx);
+    		$$invalidate(2, dataDisplay = DataDisplay.Graphics);
+    	}
+
+    	function sentToCloud() {
+    		const columns = rowsToColumns(tableRows);
+
+    		const data = {
+    			time: columns[0],
+    			sensorsArchiveValues: sensors.map((s, i) => ({
+    				unit: s.mode.unit,
+    				sensorType: s.sensorType,
+    				values: columns[i + 1]
+    			}))
+    		};
+
+    		saveData(data);
     	}
 
     	const pause = () => setPause(true);
@@ -11107,7 +11326,7 @@ var app = (function () {
 
     	function stop() {
     		setPause(true);
-    		$$invalidate(4, stopped = true);
+    		$$invalidate(5, stopped = true);
     	}
 
     	function goBack() {
@@ -11115,7 +11334,8 @@ var app = (function () {
     			if (sureExit) dispatch(CustomEvent.Back);
     		});
     	}
-    	const writable_props = ['sensors', 'intervalMs', 'experimentTimeSeconds'];
+
+    	const writable_props = ['sensors', 'intervalMs', 'experimentTimeSeconds', 'saveData'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<DashboardView> was created with unknown prop '${key}'`);
@@ -11123,26 +11343,33 @@ var app = (function () {
 
     	const click_handler = i => selectSensor(i);
     	const applyMinMax_handler = (i, { detail: { min, max } }) => charts[i].applyMinMax(min, max);
-    	const click_handler_1 = () => setPause(!paused);
+    	const click_handler_1 = () => sentToCloud();
+    	const click_handler_2 = () => setPause(!paused);
 
     	function sensorchart_binding($$value, i) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			charts[i] = $$value;
-    			$$invalidate(5, charts);
+    			$$invalidate(6, charts);
     		});
     	}
 
     	function sensorstable_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			table = $$value;
-    			$$invalidate(6, table);
+    			$$invalidate(7, table);
     		});
+    	}
+
+    	function sensorstable_rows_binding(value) {
+    		tableRows = value;
+    		$$invalidate(9, tableRows);
     	}
 
     	$$self.$$set = $$props => {
     		if ('sensors' in $$props) $$invalidate(0, sensors = $$props.sensors);
-    		if ('intervalMs' in $$props) $$invalidate(14, intervalMs = $$props.intervalMs);
-    		if ('experimentTimeSeconds' in $$props) $$invalidate(15, experimentTimeSeconds = $$props.experimentTimeSeconds);
+    		if ('intervalMs' in $$props) $$invalidate(17, intervalMs = $$props.intervalMs);
+    		if ('experimentTimeSeconds' in $$props) $$invalidate(18, experimentTimeSeconds = $$props.experimentTimeSeconds);
+    		if ('saveData' in $$props) $$invalidate(1, saveData = $$props.saveData);
     	};
 
     	$$self.$capture_state = () => ({
@@ -11151,7 +11378,6 @@ var app = (function () {
     		createEventDispatcher,
     		onMount,
     		SensorsTable: DataTable,
-    		msToString,
     		SensorChart,
     		BackButton,
     		DataDisplay,
@@ -11159,9 +11385,11 @@ var app = (function () {
     		CustomEvent,
     		getModal,
     		modalId: id,
+    		rowsToColumns,
     		sensors,
     		intervalMs,
     		experimentTimeSeconds,
+    		saveData,
     		dispatch,
     		dataDisplay,
     		selectedIdx,
@@ -11170,9 +11398,11 @@ var app = (function () {
     		charts,
     		table,
     		values,
+    		tableRows,
     		setPause,
     		toggleMeasureGraphics,
     		selectSensor,
+    		sentToCloud,
     		pause,
     		start,
     		stop,
@@ -11183,16 +11413,18 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('sensors' in $$props) $$invalidate(0, sensors = $$props.sensors);
-    		if ('intervalMs' in $$props) $$invalidate(14, intervalMs = $$props.intervalMs);
-    		if ('experimentTimeSeconds' in $$props) $$invalidate(15, experimentTimeSeconds = $$props.experimentTimeSeconds);
-    		if ('dataDisplay' in $$props) $$invalidate(1, dataDisplay = $$props.dataDisplay);
-    		if ('selectedIdx' in $$props) $$invalidate(2, selectedIdx = $$props.selectedIdx);
-    		if ('paused' in $$props) $$invalidate(3, paused = $$props.paused);
-    		if ('stopped' in $$props) $$invalidate(4, stopped = $$props.stopped);
-    		if ('charts' in $$props) $$invalidate(5, charts = $$props.charts);
-    		if ('table' in $$props) $$invalidate(6, table = $$props.table);
-    		if ('tableHeader' in $$props) $$invalidate(8, tableHeader = $$props.tableHeader);
-    		if ('numberOfVisiblePoints' in $$props) $$invalidate(9, numberOfVisiblePoints = $$props.numberOfVisiblePoints);
+    		if ('intervalMs' in $$props) $$invalidate(17, intervalMs = $$props.intervalMs);
+    		if ('experimentTimeSeconds' in $$props) $$invalidate(18, experimentTimeSeconds = $$props.experimentTimeSeconds);
+    		if ('saveData' in $$props) $$invalidate(1, saveData = $$props.saveData);
+    		if ('dataDisplay' in $$props) $$invalidate(2, dataDisplay = $$props.dataDisplay);
+    		if ('selectedIdx' in $$props) $$invalidate(3, selectedIdx = $$props.selectedIdx);
+    		if ('paused' in $$props) $$invalidate(4, paused = $$props.paused);
+    		if ('stopped' in $$props) $$invalidate(5, stopped = $$props.stopped);
+    		if ('charts' in $$props) $$invalidate(6, charts = $$props.charts);
+    		if ('table' in $$props) $$invalidate(7, table = $$props.table);
+    		if ('tableRows' in $$props) $$invalidate(9, tableRows = $$props.tableRows);
+    		if ('tableHeader' in $$props) $$invalidate(10, tableHeader = $$props.tableHeader);
+    		if ('numberOfVisiblePoints' in $$props) $$invalidate(11, numberOfVisiblePoints = $$props.numberOfVisiblePoints);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -11200,13 +11432,13 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*intervalMs, experimentTimeSeconds*/ 49152) {
+    		if ($$self.$$.dirty[0] & /*intervalMs, experimentTimeSeconds*/ 393216) {
     			// Internal
-    			$$invalidate(9, numberOfVisiblePoints = 1000 / intervalMs * experimentTimeSeconds);
+    			$$invalidate(11, numberOfVisiblePoints = 1000 / intervalMs * experimentTimeSeconds);
     		}
 
-    		if ($$self.$$.dirty & /*sensors*/ 1) {
-    			$$invalidate(8, tableHeader = [
+    		if ($$self.$$.dirty[0] & /*sensors*/ 1) {
+    			$$invalidate(10, tableHeader = [
     				`${strings$1.time} [${strings$1.timeFormat}]`,
     				...sensors.map(s => `${s.name} [${s.mode.unit}]`)
     			]);
@@ -11215,6 +11447,7 @@ var app = (function () {
 
     	return [
     		sensors,
+    		saveData,
     		dataDisplay,
     		selectedIdx,
     		paused,
@@ -11222,11 +11455,13 @@ var app = (function () {
     		charts,
     		table,
     		values,
+    		tableRows,
     		tableHeader,
     		numberOfVisiblePoints,
     		setPause,
     		toggleMeasureGraphics,
     		selectSensor,
+    		sentToCloud,
     		goBack,
     		intervalMs,
     		experimentTimeSeconds,
@@ -11236,8 +11471,10 @@ var app = (function () {
     		click_handler,
     		applyMinMax_handler,
     		click_handler_1,
+    		click_handler_2,
     		sensorchart_binding,
-    		sensorstable_binding
+    		sensorstable_binding,
+    		sensorstable_rows_binding
     	];
     }
 
@@ -11245,14 +11482,24 @@ var app = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {
-    			sensors: 0,
-    			intervalMs: 14,
-    			experimentTimeSeconds: 15,
-    			pause: 16,
-    			start: 17,
-    			stop: 18
-    		});
+    		init(
+    			this,
+    			options,
+    			instance$2,
+    			create_fragment$2,
+    			safe_not_equal,
+    			{
+    				sensors: 0,
+    				intervalMs: 17,
+    				experimentTimeSeconds: 18,
+    				saveData: 1,
+    				pause: 19,
+    				start: 20,
+    				stop: 21
+    			},
+    			null,
+    			[-1, -1]
+    		);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -11286,8 +11533,16 @@ var app = (function () {
     		throw new Error("<DashboardView>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
+    	get saveData() {
+    		throw new Error("<DashboardView>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set saveData(value) {
+    		throw new Error("<DashboardView>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
     	get pause() {
-    		return this.$$.ctx[16];
+    		return this.$$.ctx[19];
     	}
 
     	set pause(value) {
@@ -11295,7 +11550,7 @@ var app = (function () {
     	}
 
     	get start() {
-    		return this.$$.ctx[17];
+    		return this.$$.ctx[20];
     	}
 
     	set start(value) {
@@ -11303,7 +11558,7 @@ var app = (function () {
     	}
 
     	get stop() {
-    		return this.$$.ctx[18];
+    		return this.$$.ctx[21];
     	}
 
     	set stop(value) {
@@ -11322,6 +11577,7 @@ var app = (function () {
     	let dashboardview_props = {
     		sensors: /*sensors*/ ctx[1],
     		experimentTimeSeconds: Settings.experimentTime,
+    		saveData: /*saveData*/ ctx[3],
     		intervalMs: 250
     	};
 
@@ -11330,8 +11586,8 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	/*dashboardview_binding*/ ctx[5](dashboardview);
-    	dashboardview.$on("back", /*back_handler*/ ctx[6]);
+    	/*dashboardview_binding*/ ctx[7](dashboardview);
+    	dashboardview.$on("back", /*back_handler*/ ctx[8]);
 
     	const block = {
     		c: function create() {
@@ -11359,7 +11615,7 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			/*dashboardview_binding*/ ctx[5](null);
+    			/*dashboardview_binding*/ ctx[7](null);
     			destroy_component(dashboardview, detaching);
     		}
     	};
@@ -11381,10 +11637,12 @@ var app = (function () {
     	validate_slots('DashboardScreen', slots, []);
     	var _a;
     	let { lab } = $$props;
+    	let { labRepository } = $$props;
 
     	// Internal
     	let dashboard;
 
+    	let savedDataId;
     	const navigate = useNavigate();
 
     	onMount(() => {
@@ -11407,7 +11665,20 @@ var app = (function () {
     		navigate(-1);
     	}
 
-    	const writable_props = ['lab'];
+    	function saveData(data) {
+    		console.log(data);
+
+    		labRepository.saveArchiveValues(data).then(id => {
+    			if (!id) {
+    				alert(strings$1.loadFailed);
+    				return;
+    			}
+
+    			console.log(id);
+    		});
+    	}
+
+    	const writable_props = ['lab', 'labRepository'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<DashboardScreen> was created with unknown prop '${key}'`);
@@ -11423,26 +11694,33 @@ var app = (function () {
     	const back_handler = () => goBack();
 
     	$$self.$$set = $$props => {
-    		if ('lab' in $$props) $$invalidate(3, lab = $$props.lab);
+    		if ('lab' in $$props) $$invalidate(4, lab = $$props.lab);
+    		if ('labRepository' in $$props) $$invalidate(5, labRepository = $$props.labRepository);
     	};
 
     	$$self.$capture_state = () => ({
     		_a,
     		onMount,
+    		strings: strings$1,
     		DashboardView,
     		useNavigate,
     		Settings,
     		lab,
+    		labRepository,
     		dashboard,
+    		savedDataId,
     		navigate,
     		goBack,
+    		saveData,
     		sensors
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('_a' in $$props) $$invalidate(4, _a = $$props._a);
-    		if ('lab' in $$props) $$invalidate(3, lab = $$props.lab);
+    		if ('_a' in $$props) $$invalidate(6, _a = $$props._a);
+    		if ('lab' in $$props) $$invalidate(4, lab = $$props.lab);
+    		if ('labRepository' in $$props) $$invalidate(5, labRepository = $$props.labRepository);
     		if ('dashboard' in $$props) $$invalidate(0, dashboard = $$props.dashboard);
+    		if ('savedDataId' in $$props) savedDataId = $$props.savedDataId;
     		if ('sensors' in $$props) $$invalidate(1, sensors = $$props.sensors);
     	};
 
@@ -11451,8 +11729,8 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*lab, _a*/ 24) {
-    			$$invalidate(1, sensors = $$invalidate(4, _a = lab === null || lab === void 0
+    		if ($$self.$$.dirty & /*lab, _a*/ 80) {
+    			$$invalidate(1, sensors = $$invalidate(6, _a = lab === null || lab === void 0
     			? void 0
     			: lab.getSensors()) !== null && _a !== void 0
     			? _a
@@ -11460,13 +11738,23 @@ var app = (function () {
     		}
     	};
 
-    	return [dashboard, sensors, goBack, lab, _a, dashboardview_binding, back_handler];
+    	return [
+    		dashboard,
+    		sensors,
+    		goBack,
+    		saveData,
+    		lab,
+    		labRepository,
+    		_a,
+    		dashboardview_binding,
+    		back_handler
+    	];
     }
 
     class DashboardScreen extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { lab: 3 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { lab: 4, labRepository: 5 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -11478,8 +11766,12 @@ var app = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*lab*/ ctx[3] === undefined && !('lab' in props)) {
+    		if (/*lab*/ ctx[4] === undefined && !('lab' in props)) {
     			console_1$1.warn("<DashboardScreen> was created without expected prop 'lab'");
+    		}
+
+    		if (/*labRepository*/ ctx[5] === undefined && !('labRepository' in props)) {
+    			console_1$1.warn("<DashboardScreen> was created without expected prop 'labRepository'");
     		}
     	}
 
@@ -11490,6 +11782,14 @@ var app = (function () {
     	set lab(value) {
     		throw new Error("<DashboardScreen>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
+
+    	get labRepository() {
+    		throw new Error("<DashboardScreen>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set labRepository(value) {
+    		throw new Error("<DashboardScreen>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
     }
 
     /* src\App.svelte generated by Svelte v3.48.0 */
@@ -11497,7 +11797,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src\\App.svelte";
 
-    // (36:8) <Route path={RoutePath.Main}>
+    // (41:8) <Route path={RoutePath.Main}>
     function create_default_slot_3(ctx) {
     	let mainscreen;
     	let current;
@@ -11538,20 +11838,23 @@ var app = (function () {
     		block,
     		id: create_default_slot_3.name,
     		type: "slot",
-    		source: "(36:8) <Route path={RoutePath.Main}>",
+    		source: "(41:8) <Route path={RoutePath.Main}>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:8) <Route path={RoutePath.Dashboard}>
+    // (44:8) <Route path={RoutePath.Dashboard}>
     function create_default_slot_2(ctx) {
     	let dashboardscreen;
     	let current;
 
     	dashboardscreen = new DashboardScreen({
-    			props: { lab: /*lab*/ ctx[0] },
+    			props: {
+    				lab: /*lab*/ ctx[0],
+    				labRepository: /*labRepository*/ ctx[1]
+    			},
     			$$inline: true
     		});
 
@@ -11586,20 +11889,23 @@ var app = (function () {
     		block,
     		id: create_default_slot_2.name,
     		type: "slot",
-    		source: "(39:8) <Route path={RoutePath.Dashboard}>",
+    		source: "(44:8) <Route path={RoutePath.Dashboard}>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (42:8) <Route path={RoutePath.SavedData}>
+    // (47:8) <Route path={RoutePath.SavedData + '/:id'} let:params>
     function create_default_slot_1(ctx) {
     	let saveddatascreen;
     	let current;
 
     	saveddatascreen = new SavedDataScreen({
-    			props: { repository: /*labRepository*/ ctx[1] },
+    			props: {
+    				repository: /*labRepository*/ ctx[1],
+    				id: /*params*/ ctx[4].id
+    			},
     			$$inline: true
     		});
 
@@ -11611,7 +11917,11 @@ var app = (function () {
     			mount_component(saveddatascreen, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const saveddatascreen_changes = {};
+    			if (dirty & /*params*/ 16) saveddatascreen_changes.id = /*params*/ ctx[4].id;
+    			saveddatascreen.$set(saveddatascreen_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(saveddatascreen.$$.fragment, local);
@@ -11630,14 +11940,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1.name,
     		type: "slot",
-    		source: "(42:8) <Route path={RoutePath.SavedData}>",
+    		source: "(47:8) <Route path={RoutePath.SavedData + '/:id'} let:params>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (35:4) <Router>
+    // (40:4) <Router>
     function create_default_slot(ctx) {
     	let route0;
     	let t0;
@@ -11666,8 +11976,14 @@ var app = (function () {
 
     	route2 = new Route$1({
     			props: {
-    				path: RoutePath.SavedData,
-    				$$slots: { default: [create_default_slot_1] },
+    				path: RoutePath.SavedData + '/:id',
+    				$$slots: {
+    					default: [
+    						create_default_slot_1,
+    						({ params }) => ({ 4: params }),
+    						({ params }) => params ? 16 : 0
+    					]
+    				},
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -11692,21 +12008,21 @@ var app = (function () {
     		p: function update(ctx, dirty) {
     			const route0_changes = {};
 
-    			if (dirty & /*$$scope, lab*/ 9) {
+    			if (dirty & /*$$scope, lab*/ 33) {
     				route0_changes.$$scope = { dirty, ctx };
     			}
 
     			route0.$set(route0_changes);
     			const route1_changes = {};
 
-    			if (dirty & /*$$scope, lab*/ 9) {
+    			if (dirty & /*$$scope, lab*/ 33) {
     				route1_changes.$$scope = { dirty, ctx };
     			}
 
     			route1.$set(route1_changes);
     			const route2_changes = {};
 
-    			if (dirty & /*$$scope*/ 8) {
+    			if (dirty & /*$$scope, params*/ 48) {
     				route2_changes.$$scope = { dirty, ctx };
     			}
 
@@ -11738,7 +12054,7 @@ var app = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(35:4) <Router>",
+    		source: "(40:4) <Router>",
     		ctx
     	});
 
@@ -11768,7 +12084,7 @@ var app = (function () {
     			t = space();
     			create_component(router.$$.fragment);
     			attr_dev(div, "class", "content-wrapper svelte-1uaw983");
-    			add_location(div, file, 32, 0, 1078);
+    			add_location(div, file, 37, 0, 1246);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11783,7 +12099,7 @@ var app = (function () {
     		p: function update(ctx, [dirty]) {
     			const router_changes = {};
 
-    			if (dirty & /*$$scope, lab*/ 9) {
+    			if (dirty & /*$$scope, lab*/ 33) {
     				router_changes.$$scope = { dirty, ctx };
     			}
 
@@ -11824,6 +12140,11 @@ var app = (function () {
     	let dashboard;
     	const labRepository = new WebSocketLabRepository("lab");
     	let lab;
+    	const command = Commands.getSensorValues();
+
+    	for (let i = 0; i < command; i++) {
+    		command[i].toString(16);
+    	}
 
     	onMount(async () => {
     		try {
@@ -11860,9 +12181,11 @@ var app = (function () {
     		MainScreen,
     		DashboardScreen,
     		ModalDashboardConfirm,
+    		Commands,
     		dashboard,
     		labRepository,
-    		lab
+    		lab,
+    		command
     	});
 
     	$$self.$inject_state = $$props => {
