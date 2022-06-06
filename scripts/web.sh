@@ -9,8 +9,9 @@ TARGET=core/web.h;
 PREFIX="#ifndef __WEB_H__
 #define __WEB_H__
 const char PAGE_MAIN[] PROGMEM = R\"=====(
-    
-    "
+
+
+"
 
 SUFFIX="
 
