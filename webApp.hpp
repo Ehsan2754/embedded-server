@@ -1,7 +1,8 @@
 #ifndef __WEBAPP_HPP__
 #define __WEBAPP_HPP__
-#define CYCLE_INTERVAL 1000
-#define DOMAIN "zarnitza" SERIAL_NO
+#define CYCLE_INTERVAL 125
+#define DOMAIN "zlab" 
+#define DOMAIN_LEN 4 
 extern String ssid;
 extern String pass;
 extern String ip;
@@ -13,6 +14,7 @@ extern const char *PARAM_INPUT_3;
 extern const char *PARAM_INPUT_4;
 
 void initDNS();
+void initWebSocket();
 void initWebAppServer();
 void initWifiAP();
 #endif //__WEBAPP_HPP__

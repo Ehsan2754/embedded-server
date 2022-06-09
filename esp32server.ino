@@ -6,36 +6,32 @@
 #include "webApp.hpp"
 #include "config.hpp"
 
-
 // Timer variables
 const long interval = 10 * 1000; // interval to wait for Wi-Fi connection (milliseconds)
 unsigned long previousMillis = 0;
-
-
 
 IPAddress localIP;
 IPAddress localGateway;
 IPAddress subnet(255, 255, 0, 0);
 
-
-
 // Initialize WiFi
 bool initWiFi()
 {
+  WiFi.mode(WIFI_STA);
   if (ssid == "" || ip == "")
   {
     DEBUG_PRINTLN("Undefined SSID or IP address.");
-    return false;
   }
-
-  WiFi.mode(WIFI_STA);
-  localIP.fromString(ip.c_str());
-  localGateway.fromString(gateway.c_str());
-
-  if (!WiFi.config(localIP, localGateway, subnet))
+  else
   {
-    DEBUG_PRINTLN("STA Failed to configure");
-    return false;
+    localIP.fromString(ip.c_str());
+    localGateway.fromString(gateway.c_str());
+
+    if (!WiFi.config(localIP, localGateway, subnet))
+    {
+      DEBUG_PRINTLN("STA Failed to configure");
+      return false;
+    }
   }
   WiFi.begin(ssid.c_str(), pass.c_str());
   DEBUG_PRINTLN("Connecting to WiFi...");
@@ -57,15 +53,13 @@ bool initWiFi()
   return true;
 }
 
-
-
 void setup()
 {
-  // Serial port for debugging purposes
   Serial.begin(115200);
   Serial.setTimeout(TIMEOUT);
   Serial2.begin(115200);
   Serial2.setTimeout(TIMEOUT);
+  getSerialNumber();
   disableCore0WDT();
   initSPIFFS();
 
@@ -87,11 +81,13 @@ void setup()
   {
     printWifiStatus();
     initDNS();
+    initWebSocket();
     initWebAppServer();
   }
   else
   {
     initWifiAP();
+    initDNS();
   }
 }
 

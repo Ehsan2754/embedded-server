@@ -141,6 +141,29 @@ button:focus {
       margin: 0 auto;
       margin-bottom: 0.2rem; } }
 
+.modal-content .header {
+  font-size: 2em;
+  line-height: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem; }
+
+.modal-content .text {
+  font-size: 1.25em;
+  line-height: 1.5rem;
+  margin-bottom: 0.75rem; }
+
+.modal-content .buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-left: auto;
+  align-items: center;
+  gap: 3px; }
+
+.modal-content .buttons button {
+  flex: 1;
+  width: 8rem;
+  margin-top: 1rem; }
+
 .control-buttons > button {
   width: 4rem;
   height: 4rem;
@@ -175,7 +198,7 @@ button:focus {
   background-color: white;
   display: grid;
   grid-template: 1fr 2rem /  2rem 1fr;
-  grid-template-areas: "chart-label-y chart" ". chart-label-x";
+  grid-template-areas: "chart-label-y chart" ". chart-label-x";
   padding: 1rem;
   flex: 1;
   position: absolute;
