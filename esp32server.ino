@@ -54,12 +54,13 @@ bool initWiFi()
 
 void setup()
 {
+  disableCore0WDT();
+  disableCore1WDT();
   Serial.begin(115200);
   Serial.setTimeout(TIMEOUT);
   Serial2.begin(115200);
   Serial2.setTimeout(TIMEOUT);
   getSerialNumber();
-  disableCore0WDT();
   initSPIFFS();
 
   // Set GPIO 2 as an OUTPUT
@@ -71,7 +72,7 @@ void setup()
   pass = readFile(SPIFFS, passPath);
   ip = readFile(SPIFFS, ipPath);
   gateway = readFile(SPIFFS, gatewayPath);
-  if (ssid!="")
+  if (ssid != "")
   {
     DEBUG_PRINTLN(DEBUG_INFO "SSID=");
     DEBUG_PRINTLN(ssid);
@@ -80,7 +81,7 @@ void setup()
   {
     DEBUG_PRINTLN(DEBUG_INFO "No SSID!");
   }
-  if (pass!="")
+  if (pass != "")
   {
     DEBUG_PRINT(DEBUG_INFO "PASSWORD=");
     DEBUG_PRINTLN(pass);
@@ -89,7 +90,7 @@ void setup()
   {
     DEBUG_PRINT(DEBUG_INFO "No PASSWORD!");
   }
-  if (ip!="")
+  if (ip != "")
   {
     DEBUG_PRINT(DEBUG_INFO "IP=");
     DEBUG_PRINTLN(ip);
@@ -98,7 +99,7 @@ void setup()
   {
     DEBUG_PRINTLN(DEBUG_INFO "No IP!");
   }
-  if (gateway!="")
+  if (gateway != "")
   {
     DEBUG_PRINT(DEBUG_INFO "Gateway=");
     DEBUG_PRINTLN(gateway);
@@ -113,7 +114,7 @@ void setup()
     initWebAppServer();
     initWebSocket();
     initDNS(false);
-    xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 1, &serverTaskHandle, ESP32_CORE_1);
+    xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
   }
   else
   {

@@ -31,7 +31,7 @@ AsyncWebServer server(80);
 DNSServer *dnsServer = new DNSServer;
 AsyncWebSocket *ws = new AsyncWebSocket(PATH_SOCKET);
 const TickType_t xDelay = CYCLE_INTERVAL / portTICK_PERIOD_MS;
-const TickType_t heartbeatDelay = CYCLE_INTERVAL * 100 / portTICK_PERIOD_MS;
+const TickType_t heartbeatDelay = CYCLE_INTERVAL * 20 / portTICK_PERIOD_MS;
 
 class CaptiveRequestHandler : public AsyncWebHandler
 {
@@ -93,7 +93,7 @@ void initDNS(bool ap)
       MDNS.addService("http", "tcp", 80);
     }
   }
-  xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL,2, &DNSTaskHandle, ESP32_CORE_0);
+  xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL,1, &DNSTaskHandle, ESP32_CORE_0);
 }
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
@@ -165,7 +165,7 @@ void initWebSocket()
   ws->onEvent(onEvent);
   server.addHandler(ws);
   subscribeFlag = true;
-  xTaskCreatePinnedToCore(socketTaskRoutine, "socketTaskRoutine", 2048, NULL, 1, &socketTaskHandle, ESP32_CORE_1);
+  xTaskCreatePinnedToCore(socketTaskRoutine, "socketTaskRoutine", 2048, NULL, 2, &socketTaskHandle, ESP32_CORE_1);
 }
 
 // static char path_sendcommand_str[PATH_SENDCOMMAND_LEN + SERIAL_NO_LEN];
@@ -344,17 +344,17 @@ void initWifiAP()
       delay(3000);
       ESP.restart(); });
 
-  server.onNotFound([](AsyncWebServerRequest *request)
-                    {
-                      DEBUG_PRINT(DEBUG_APP "NOT FOUND REQUEST!");
-                      DEBUG_PRINTLN(request->url());
-  if(request->url()!="/dashboard" ||
-  request->url()!=PATH_SENDCOMMAND||
-  request->url()!=PATH_SUBSCRIBE||
-  request->url()!="/config"||
-  request->url()!="/"
-  )
-  {request->send(SPIFFS, "/404.html", "text/html"); } });
+  // server.onNotFound([](AsyncWebServerRequest *request)
+  //                   {
+  //                     DEBUG_PRINT(DEBUG_APP "NOT FOUND REQUEST!");
+  //                     DEBUG_PRINTLN(request->url());
+  // if(request->url()!="/dashboard" ||
+  // request->url()!=PATH_SENDCOMMAND||
+  // request->url()!=PATH_SUBSCRIBE||
+  // request->url()!="/config"||
+  // request->url()!="/"
+  // )
+  // {request->send(SPIFFS, "/404.html", "text/html"); } });
   server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER); // only when requested from AP
   server.begin();
 }

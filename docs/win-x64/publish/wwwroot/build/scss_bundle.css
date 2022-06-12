@@ -198,7 +198,7 @@ button:focus {
   background-color: white;
   display: grid;
   grid-template: 1fr 2rem /  2rem 1fr;
-  grid-template-areas: "chart-label-y chart" ". chart-label-x";
+  grid-template-areas: "chart-label-y chart" ". chart-label-x";
   padding: 1rem;
   flex: 1;
   position: absolute;

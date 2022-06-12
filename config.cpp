@@ -46,11 +46,11 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
 {
   if (serial2Lock)
   {
-    DEBUG_PRINT(DEBUG_LAB "Waiting for device to get free.");
+    DEBUG_PRINTLN(DEBUG_LAB "Waiting for device to get free....");
   }
   while (serial2Lock)
   {
-    DEBUG_PRINT(".");
+    // DEBUG_PRINT(".");
   }
   DEBUG_PRINTLN();
   serial2Lock = true;
@@ -159,8 +159,8 @@ void getSerialNumber()
   DEBUG_PRINT(DEBUG_LAB "REGISTERED-SERIAL:=");
   DEBUG_PRINTLN(SN);
 }
-const char *SERVER_ADDR = "10.242.1.99";
-const IPAddress ServerIP(10, 242,1, 99);
+const char *SERVER_ADDR = "192.168.137.1";
+const IPAddress ServerIP(192, 168, 137, 1);
 const int SERVER_PORT = 42;
 static uint16_t packetSize = 0;
 static unsigned char serverPacket[BUFFER_SIZE];
@@ -202,6 +202,7 @@ void serverConnectionHandleRoutine(void *pvParameters)
       udp.printf("$%s", SN);
       udp.endPacket();
     }
+    vTaskDelay(xServerDelay);
     packetSize = udp.parsePacket();
     if (packetSize)
     {
@@ -209,15 +210,15 @@ void serverConnectionHandleRoutine(void *pvParameters)
       DEBUG_PRINTLN(packetSize);
       uint16_t serverReqLen = udp.read(serverPacket, BUFFER_SIZE);
 
-      if ((serverReqLen == (SERIAL_NO_LEN + 1)) && (!established) && serverPacket[0] == '$')
+      if ((serverReqLen == (SERIAL_NO_LEN + 1)) && (!established) && (serverPacket[0] == '$'))
       {
         // Establishment Packet
-        DEBUG_PRINTLN(DEBUG_SERVER "Establishment Packet Reveived.");
+        DEBUG_PRINTLN(DEBUG_SERVER "Establishment Packet Received.");
         // check SN match
         bool matchSN = true;
         for (uint8_t i = 1; i < (SERIAL_NO_LEN + 1); i++)
         {
-          if (serverPacket[i] != SN[i - 1] && serverReqLen != (SERIAL_NO_LEN + 1))
+          if (serverPacket[i] != SN[i - 1])
           {
             DEBUG_PRINTLN(DEBUG_SERVER "CONNECTION Failed Establishment.");
             matchSN = false;
@@ -234,11 +235,17 @@ void serverConnectionHandleRoutine(void *pvParameters)
       else
       {
         // Command Packet
-        DEBUG_PRINTLN(DEBUG_SERVER "Command Packet Reveived.");
+        DEBUG_PRINTLN(DEBUG_SERVER "Command Packet Received.");
         DEBUG_PRINTLN(DEBUG_SERVER "Retriving result from the lab.");
         uint16_t serverRespLen = transmitCommand(serverPacket, serverReqLen, serverResponse, BUFFER_SIZE);
         udp.beginPacket(SERVER_ADDR, SERVER_PORT);
-        udp.printf("%.*s", serverRespLen, serverResponse);
+        DEBUG_PRINT(DEBUG_SERVER "RESPONSE PACKET LENGTH=")
+        DEBUG_PRINTLN(serverRespLen)
+        for (uint_16 i = 0; i < serverRespLen; i++)
+        {
+          udp.write(serverRespLen[i]);
+        }
+
         udp.endPacket();
         DEBUG_PRINTLN(DEBUG_SERVER "Server request answered.");
       }

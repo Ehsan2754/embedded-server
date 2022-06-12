@@ -1,6 +1,6 @@
 #ifndef __WEBAPP_HPP__
 #define __WEBAPP_HPP__
-#define CYCLE_INTERVAL 100
+#define CYCLE_INTERVAL 230
 #define DOMAIN "zlab" 
 #define DOMAIN_LEN 4 
 extern String ssid;
