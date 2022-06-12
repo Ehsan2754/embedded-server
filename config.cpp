@@ -4,7 +4,8 @@
 #include <HardwareSerial.h>
 #include <ESP32Ping.h>
 #include "config.hpp"
-
+#include <freertos/semphr.h>
+SemaphoreHandle_t mutex;
 bool serial2Lock = false;
 char SN[SERIAL_NO_LEN] = "";
 WiFiUDP udp;
@@ -44,6 +45,10 @@ const uint16_t table[256] = {
 
 unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned char *Rx, unsigned int lenRx)
 {
+  // Take the mutex
+  unsigned int response_len = 0;
+  *Rx=0x00;
+  if (xSemaphoreTake(mutex, TIMEOUT)== pdTRUE){
   if (serial2Lock)
   {
     DEBUG_PRINTLN(DEBUG_LAB "Waiting for device to get free....");
@@ -72,7 +77,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
   }
   DEBUG_PRINT("}");
   DEBUG_PRINTLN();
-  unsigned int response_len = Serial2.readBytes(Rx, lenRx);
+  response_len = Serial2.readBytes(Rx, lenRx);
   DEBUG_PRINT(DEBUG_LAB "response-packet={");
   for (auto i = 0; i < response_len; i++)
   {
@@ -84,8 +89,11 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
   }
   DEBUG_PRINT("}");
   DEBUG_PRINTLN();
-
   serial2Lock = false;
+  
+  // Release the mutex so that the creating function can finish
+  xSemaphoreGive(mutex);
+  }
   return response_len;
 }
 
@@ -159,13 +167,12 @@ void getSerialNumber()
   DEBUG_PRINT(DEBUG_LAB "REGISTERED-SERIAL:=");
   DEBUG_PRINTLN(SN);
 }
-const char *SERVER_ADDR = "192.168.137.1";
-const IPAddress ServerIP(192, 168, 137, 1);
-const int SERVER_PORT = 42;
+const char *SERVER_ADDR = UDP_SERVER_IP;
+const int SERVER_PORT = UDP_SERVER_PORT;
 static uint16_t packetSize = 0;
 static unsigned char serverPacket[BUFFER_SIZE];
 static unsigned char serverResponse[BUFFER_SIZE];
-const TickType_t xServerDelay = 100 / portTICK_PERIOD_MS;
+const TickType_t xServerDelay = UDP_SERVER_AWAIT / portTICK_PERIOD_MS;
 void serverConnectionHandleRoutine(void *pvParameters)
 {
   // pinging
@@ -199,7 +206,20 @@ void serverConnectionHandleRoutine(void *pvParameters)
     {
       DEBUG_PRINTLN(DEBUG_SERVER "Establishing connection");
       udp.beginPacket(SERVER_ADDR, SERVER_PORT);
-      udp.printf("$%s", SN);
+      unsigned char serialPKT[11];
+      serialPKT[0] = '$';
+      for (auto i = 0; i < SERIAL_NO_LEN; i++)
+      {
+        serialPKT[i + 1] = SN[i];
+      }
+      uint16_t serialPKT_crc = MODBUS_CRC16(serialPKT, SERIAL_NO_LEN + 1);
+      serialPKT[SERIAL_NO_LEN + 1] = (unsigned char)(serialPKT_crc >> 8);
+      serialPKT[SERIAL_NO_LEN + 2] = (unsigned char)serialPKT_crc;
+      for (auto i = 0; i < SERIAL_NO_LEN + 3; i++)
+      {
+        udp.write(serialPKT[i]);
+      }
+
       udp.endPacket();
     }
     vTaskDelay(xServerDelay);
@@ -209,8 +229,8 @@ void serverConnectionHandleRoutine(void *pvParameters)
       DEBUG_PRINT(DEBUG_SERVER "Incoming PACKET SIZE=");
       DEBUG_PRINTLN(packetSize);
       uint16_t serverReqLen = udp.read(serverPacket, BUFFER_SIZE);
-
-      if ((serverReqLen == (SERIAL_NO_LEN + 1)) && (!established) && (serverPacket[0] == '$'))
+      static const auto CRC_LEN = 2;
+      if ((serverReqLen == (SERIAL_NO_LEN + 1 + CRC_LEN)) && (!established) && (serverPacket[0] == '$'))
       {
         // Establishment Packet
         DEBUG_PRINTLN(DEBUG_SERVER "Establishment Packet Received.");
@@ -228,8 +248,17 @@ void serverConnectionHandleRoutine(void *pvParameters)
         if (matchSN)
         {
           DEBUG_PRINTLN(DEBUG_SERVER "SERIAL NUMBER MATCHED RESPONSE!");
-          DEBUG_PRINTLN(DEBUG_SERVER "CONNECTION Established.");
-          established = true;
+          auto crc = MODBUS_CRC16(serverPacket, SERIAL_NO_LEN + 1);
+          if ((serverPacket[serverReqLen - 2] == (uint8_t)(crc >> 8)) &&
+              (serverPacket[serverReqLen - 1] == (uint8_t)(crc)))
+          {
+            established = true;
+            DEBUG_PRINTLN(DEBUG_SERVER "CONNECTION Established.");
+          }
+          else
+          {
+            DEBUG_PRINTLN(DEBUG_SERVER "CONNECTION Establishment failed matching in CRC.");
+          }
         }
       }
       else
@@ -237,13 +266,13 @@ void serverConnectionHandleRoutine(void *pvParameters)
         // Command Packet
         DEBUG_PRINTLN(DEBUG_SERVER "Command Packet Received.");
         DEBUG_PRINTLN(DEBUG_SERVER "Retriving result from the lab.");
-        uint16_t serverRespLen = transmitCommand(serverPacket, serverReqLen, serverResponse, BUFFER_SIZE);
+        auto serverRespLen = transmitCommand(serverPacket, serverReqLen, serverResponse, BUFFER_SIZE);
         udp.beginPacket(SERVER_ADDR, SERVER_PORT);
-        DEBUG_PRINT(DEBUG_SERVER "RESPONSE PACKET LENGTH=")
-        DEBUG_PRINTLN(serverRespLen)
-        for (uint_16 i = 0; i < serverRespLen; i++)
+        DEBUG_PRINT(DEBUG_SERVER "RESPONSE PACKET LENGTH=");
+        DEBUG_PRINTLN(serverRespLen);
+        for (auto i = 0; i < serverRespLen; i++)
         {
-          udp.write(serverRespLen[i]);
+          udp.write(serverResponse[i]);
         }
 
         udp.endPacket();

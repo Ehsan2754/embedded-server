@@ -54,6 +54,7 @@ bool initWiFi()
 
 void setup()
 {
+  mutex = xSemaphoreCreateMutex();
   disableCore0WDT();
   disableCore1WDT();
   Serial.begin(115200);
@@ -110,10 +111,12 @@ void setup()
   }
   if (initWiFi())
   {
+    
     printWifiStatus();
-    initWebAppServer();
-    initWebSocket();
     initDNS(false);
+    initWebAppServer();
+    delay(1000);
+    initWebSocket();
     xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
   }
   else

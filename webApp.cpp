@@ -1,5 +1,6 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <WiFi.h>
 #include <DNSServer.h>
 #include <ESPmDNS.h>
 #include <AsyncTCP.h>
@@ -31,7 +32,7 @@ AsyncWebServer server(80);
 DNSServer *dnsServer = new DNSServer;
 AsyncWebSocket *ws = new AsyncWebSocket(PATH_SOCKET);
 const TickType_t xDelay = CYCLE_INTERVAL / portTICK_PERIOD_MS;
-const TickType_t heartbeatDelay = CYCLE_INTERVAL * 20 / portTICK_PERIOD_MS;
+const TickType_t heartbeatDelay = HEARBEAT_INTERVAL / portTICK_PERIOD_MS;
 
 class CaptiveRequestHandler : public AsyncWebHandler
 {
@@ -57,6 +58,7 @@ void DNSTaskRoutine(void *pvParameters)
   for (;;)
   {
     dnsServer->processNextRequest();
+//    MDNS.update();
   }
 }
 void initDNS(bool ap)
@@ -81,7 +83,7 @@ void initDNS(bool ap)
   else
   {
     dnsServer = new DNSServer;
-    dnsServer->start(53, "zlab.local", WiFi.localIP());
+    dnsServer->start(53, "www.zlab.local", WiFi.localIP());
     if (!MDNS.begin(DOMAIN))
     {
       DEBUG_PRINTLN("Error setting up MDNS responder!");
@@ -93,7 +95,7 @@ void initDNS(bool ap)
       MDNS.addService("http", "tcp", 80);
     }
   }
-  xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL,1, &DNSTaskHandle, ESP32_CORE_0);
+  xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL, 1, &DNSTaskHandle, ESP32_CORE_0);
 }
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
@@ -172,7 +174,7 @@ void initWebSocket()
 // static char path_subscribe_str[PATH_SUBSCRIBE_LEN + SERIAL_NO_LEN];
 void initWebAppServer()
 {
-  server.serveStatic("/config/", SPIFFS, "/config/")
+  server.serveStatic(PATH_CONFIG "/", SPIFFS, PATH_CONFIG "/")
       .setDefaultFile("/admin.html");
 
   server.serveStatic("/", SPIFFS, "/");
@@ -216,7 +218,7 @@ void initWebAppServer()
         request->send(response);
       });
 
-  server.on("/config", HTTP_POST, [](AsyncWebServerRequest *request)
+  server.on(PATH_CONFIG, HTTP_POST, [](AsyncWebServerRequest *request)
             {
       int params = request->params();
       for(int i=0;i<params;i++){

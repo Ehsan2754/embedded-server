@@ -51,15 +51,15 @@ table = [0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
 #     crc = 0xFFFF
 #     for index in range(len(data)-1,0,-1):
 #         print(data[index])
-#         # myxor = 
-      
+#         # myxor =
+
 
 if __name__ == "__main__":
     # b = b"\xaa\x06\x00\x00\xc1\xfd"
     # print(crc16(b))
     # exit()
 
-    localIP = "192.168.137.1"
+    localIP = "10.242.1.99"
 
     localPort = 42
 
@@ -88,14 +88,14 @@ if __name__ == "__main__":
 
             address = bytesAddressPair[1]
 
-            clientMsg = "Message from Client:{}".format(message.decode())
+            clientMsg = "Message from Client:{}".format(message)
             clientIP = "Client IP Address:{}".format(address)
             print(clientMsg)
             print(clientIP)
 
             # Sending a reply to client
-            str_msg = message.decode()
-            if str_msg.startswith('$'):
+            # str_msg = message.decode()
+            if message[0] == b'$':
                 print("\tClient Trying To Establish connection SN=", message)
                 print("\tHandshaking Start...")
                 bytesToSend = message

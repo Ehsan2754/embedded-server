@@ -2,10 +2,10 @@
 #include "fileSystem.hpp"
 #include "config.hpp"
 
-const char *ssidPath = "/config/ssid.txt";
-const char *passPath = "/config/pass.txt";
-const char *ipPath = "/config/ip.txt";
-const char *gatewayPath = "/config/gateway.txt";
+const char *ssidPath = PATH_CONFIG "/ssid.txt";
+const char *passPath = PATH_CONFIG "/pass.txt";
+const char *ipPath = PATH_CONFIG "/ip.txt";
+const char *gatewayPath = PATH_CONFIG "/gateway.txt";
 
 // Initialize SPIFFS
 void initSPIFFS()

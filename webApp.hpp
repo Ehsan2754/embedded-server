@@ -1,12 +1,12 @@
 #ifndef __WEBAPP_HPP__
 #define __WEBAPP_HPP__
-#define CYCLE_INTERVAL 230
-#define DOMAIN "zlab" 
-#define DOMAIN_LEN 4 
+
+
 extern String ssid;
 extern String pass;
 extern String ip;
 extern String gateway;
+
 // Search for parameter in HTTP POST request
 extern const char *PARAM_INPUT_1;
 extern const char *PARAM_INPUT_2;
