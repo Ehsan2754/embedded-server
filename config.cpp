@@ -1,10 +1,13 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WiFiUdp.h>
 #include <HardwareSerial.h>
+#include <ESP32Ping.h>
 #include "config.hpp"
-// serial2lock
+
 bool serial2Lock = false;
 char SN[SERIAL_NO_LEN] = "";
+WiFiUDP udp;
 const uint16_t table[256] = {
     0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
     0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
@@ -43,7 +46,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
 {
   if (serial2Lock)
   {
-    DEBUG_PRINT("Waiting for device to get free.");
+    DEBUG_PRINT(DEBUG_LAB "Waiting for device to get free.");
   }
   while (serial2Lock)
   {
@@ -58,7 +61,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
   {
     Serial2.write(*(Tx + i));
   }
-  DEBUG_PRINT("request-packet={");
+  DEBUG_PRINT(DEBUG_LAB "request-packet={");
   for (auto i = 0; i < lenTx; i++)
   {
     DEBUG_PRINTF(" 0x%X ", *(Tx + i));
@@ -70,7 +73,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
   DEBUG_PRINT("}");
   DEBUG_PRINTLN();
   unsigned int response_len = Serial2.readBytes(Rx, lenRx);
-  DEBUG_PRINT("response-packet={");
+  DEBUG_PRINT(DEBUG_LAB "response-packet={");
   for (auto i = 0; i < response_len; i++)
   {
     DEBUG_PRINTF(" 0x%X ", *(Rx + i));
@@ -98,25 +101,31 @@ uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
     crc >>= 8;
     crc ^= table[myxor];
   }
-  DEBUG_PRINTF("CRC-16/MODBUS = 0x%X\n", (uint16_t)(crc << 8 | crc >> 8));
+  DEBUG_PRINTF(DEBUG_LAB "CRC-16/MODBUS = 0x%X\n", (uint16_t)(crc << 8 | crc >> 8));
   return crc << 8 | crc >> 8;
 }
 uint32_t obtainSerialNumber()
 {
-  DEBUG_PRINTLN("Obtaining  Serial Number.");
+  DEBUG_PRINTLN(DEBUG_LAB "Obtaining  Serial Number.");
   unsigned char GET_HW_CONFIG_Tx[] = {0xAA, 0x06, 0x00, 0x83, 0x80, 0x5C};
   unsigned char RESP_BUFFER[128];
   auto LenResp = transmitCommand(GET_HW_CONFIG_Tx, 6, RESP_BUFFER, 128);
   auto expectedLen = 66;
   uint32_t SerialNumber = 0;
+  if (!LenResp)
+  {
+    DEBUG_PRINTF(DEBUG_LAB "Device is off.\n", LenResp, expectedLen);
+    return 0;
+  }
+
   if (LenResp != expectedLen)
   {
-    DEBUG_PRINTF("ERROR->Invalid Package Length! GOT:%d : EXPECTED %d\n", LenResp, expectedLen);
+    DEBUG_PRINTF(DEBUG_LAB "ERROR->Invalid Package Length! GOT:%d : EXPECTED %d\n", LenResp, expectedLen);
     SerialNumber = 0;
   }
   if (((RESP_BUFFER[LenResp - 2] << 8) | RESP_BUFFER[LenResp - 1]) != MODBUS_CRC16(RESP_BUFFER, LenResp - 2))
   {
-    DEBUG_PRINTLN("ERROR->Invalid CRC!");
+    DEBUG_PRINTLN(DEBUG_LAB "ERROR->Invalid CRC!");
     SerialNumber = 0;
   }
   else
@@ -125,11 +134,11 @@ uint32_t obtainSerialNumber()
   }
   if (!SerialNumber)
   {
-    DEBUG_PRINTLN("ERROR OBTAINING SERIAL NUMBER!");
+    DEBUG_PRINTLN(DEBUG_LAB "ERROR OBTAINING SERIAL NUMBER!");
   }
   else
   {
-    DEBUG_PRINTF(">> SERIAL NUMBER : 0x%08X\n", SerialNumber);
+    DEBUG_PRINTF(DEBUG_LAB ">> SERIAL NUMBER : 0x%08X\n", SerialNumber);
   }
   return SerialNumber;
 }
@@ -140,39 +149,120 @@ void getSerialNumber()
   {
     if (intSN)
     {
-      DEBUG_PRINTLN(">> SERIAL NUMBER FOUND.");
+      DEBUG_PRINTLN(DEBUG_LAB ">> SERIAL NUMBER FOUND.");
       break;
     }
     intSN = obtainSerialNumber();
     delay(250);
   }
   sprintf(SN, "%08X", intSN);
-  DEBUG_PRINT("REGISTERED-SERIAL:=");
+  DEBUG_PRINT(DEBUG_LAB "REGISTERED-SERIAL:=");
   DEBUG_PRINTLN(SN);
 }
-
-void serverConnection()
+const char *SERVER_ADDR = "10.242.1.99";
+const IPAddress ServerIP(10, 242,1, 99);
+const int SERVER_PORT = 42;
+static uint16_t packetSize = 0;
+static unsigned char serverPacket[BUFFER_SIZE];
+static unsigned char serverResponse[BUFFER_SIZE];
+const TickType_t xServerDelay = 100 / portTICK_PERIOD_MS;
+void serverConnectionHandleRoutine(void *pvParameters)
 {
-  DEBUG_PRINTLN("Checking if Server is available.");
+  // pinging
+  //  DEBUG_PRINTLN(DEBUG_SERVER "Checking if Server is available.");
+  //  if (!Ping.ping(ServerIP))
+  //  {
+  //    DEBUG_PRINT(DEBUG_SERVER "Server ");
+  //    DEBUG_PRINT(ServerIP);
+  //    DEBUG_PRINTLN(" not available. OFFLINE");
+  //    DEBUG_PRINTLN(DEBUG_SERVER " Waiting for connection ...");
+  //  }
+  //  while (!Ping.ping(ServerIP))
+  //  {
+  //  }
+  //  DEBUG_PRINT(DEBUG_SERVER "Server ");
+  //  DEBUG_PRINT(ServerIP);
+  //  DEBUG_PRINTLN(" Online");
+  // end of pinging
+
+  DEBUG_PRINT(DEBUG_SERVER "Connecting Server UDP SOCKET : ");
+  DEBUG_PRINT(SERVER_ADDR);
+  DEBUG_PRINTLN(SERVER_PORT);
+
+  bool established = false;
+
+  for (;;)
+  {
+    packetSize = 0;
+
+    if (!established)
+    {
+      DEBUG_PRINTLN(DEBUG_SERVER "Establishing connection");
+      udp.beginPacket(SERVER_ADDR, SERVER_PORT);
+      udp.printf("$%s", SN);
+      udp.endPacket();
+    }
+    packetSize = udp.parsePacket();
+    if (packetSize)
+    {
+      DEBUG_PRINT(DEBUG_SERVER "Incoming PACKET SIZE=");
+      DEBUG_PRINTLN(packetSize);
+      uint16_t serverReqLen = udp.read(serverPacket, BUFFER_SIZE);
+
+      if ((serverReqLen == (SERIAL_NO_LEN + 1)) && (!established) && serverPacket[0] == '$')
+      {
+        // Establishment Packet
+        DEBUG_PRINTLN(DEBUG_SERVER "Establishment Packet Reveived.");
+        // check SN match
+        bool matchSN = true;
+        for (uint8_t i = 1; i < (SERIAL_NO_LEN + 1); i++)
+        {
+          if (serverPacket[i] != SN[i - 1] && serverReqLen != (SERIAL_NO_LEN + 1))
+          {
+            DEBUG_PRINTLN(DEBUG_SERVER "CONNECTION Failed Establishment.");
+            matchSN = false;
+            break;
+          }
+        }
+        if (matchSN)
+        {
+          DEBUG_PRINTLN(DEBUG_SERVER "SERIAL NUMBER MATCHED RESPONSE!");
+          DEBUG_PRINTLN(DEBUG_SERVER "CONNECTION Established.");
+          established = true;
+        }
+      }
+      else
+      {
+        // Command Packet
+        DEBUG_PRINTLN(DEBUG_SERVER "Command Packet Reveived.");
+        DEBUG_PRINTLN(DEBUG_SERVER "Retriving result from the lab.");
+        uint16_t serverRespLen = transmitCommand(serverPacket, serverReqLen, serverResponse, BUFFER_SIZE);
+        udp.beginPacket(SERVER_ADDR, SERVER_PORT);
+        udp.printf("%.*s", serverRespLen, serverResponse);
+        udp.endPacket();
+        DEBUG_PRINTLN(DEBUG_SERVER "Server request answered.");
+      }
+    }
+  }
 }
 void printWifiStatus()
 {
 
   // print the SSID of the network you're attached to:
-  DEBUG_PRINT("SSID: ");
+  DEBUG_PRINT(DEBUG_INFO "SSID: ");
   DEBUG_PRINTLN(WiFi.SSID());
 
   // print your WiFi shield's IP address:
   auto ip = WiFi.localIP();
-  DEBUG_PRINT("IP Address: ");
+  DEBUG_PRINT(DEBUG_INFO "IP Address: ");
   DEBUG_PRINTLN(ip);
 
   // print the received signal strength:
   long rssi = WiFi.RSSI();
-  DEBUG_PRINT("signal strength (RSSI):");
+  DEBUG_PRINT(DEBUG_INFO "signal strength (RSSI):");
   DEBUG_PRINT(rssi);
   DEBUG_PRINTLN(" dBm");
   // print where to go in a browser:
-  DEBUG_PRINT("Open http://");
+  DEBUG_PRINT(DEBUG_INFO "Open http://");
   DEBUG_PRINTLN(ip);
 }

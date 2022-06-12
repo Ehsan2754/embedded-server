@@ -1,6 +1,6 @@
 #ifndef __WEBAPP_HPP__
 #define __WEBAPP_HPP__
-#define CYCLE_INTERVAL 125
+#define CYCLE_INTERVAL 100
 #define DOMAIN "zlab" 
 #define DOMAIN_LEN 4 
 extern String ssid;
@@ -12,8 +12,7 @@ extern const char *PARAM_INPUT_1;
 extern const char *PARAM_INPUT_2;
 extern const char *PARAM_INPUT_3;
 extern const char *PARAM_INPUT_4;
-
-void initDNS();
+void initDNS(bool ap);
 void initWebSocket();
 void initWebAppServer();
 void initWifiAP();
