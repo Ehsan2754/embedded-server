@@ -47,52 +47,53 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
 {
   // Take the mutex
   unsigned int response_len = 0;
-  *Rx=0x00;
-  if (xSemaphoreTake(mutex, TIMEOUT)== pdTRUE){
-  if (serial2Lock)
+  *Rx = 0x00;
+  if (xSemaphoreTake(mutex, TIMEOUT) == pdTRUE)
   {
-    DEBUG_PRINTLN(DEBUG_LAB "Waiting for device to get free....");
-  }
-  while (serial2Lock)
-  {
-    // DEBUG_PRINT(".");
-  }
-  DEBUG_PRINTLN();
-  serial2Lock = true;
-
-  Serial2.flush();
-
-  for (auto i = 0; i < lenTx; i++)
-  {
-    Serial2.write(*(Tx + i));
-  }
-  DEBUG_PRINT(DEBUG_LAB "request-packet={");
-  for (auto i = 0; i < lenTx; i++)
-  {
-    DEBUG_PRINTF(" 0x%X ", *(Tx + i));
-    if (i != lenTx - 1)
+    if (serial2Lock)
     {
-      DEBUG_PRINTF(",");
+      DEBUG_PRINTLN(DEBUG_LAB "Waiting for device to get free....");
     }
-  }
-  DEBUG_PRINT("}");
-  DEBUG_PRINTLN();
-  response_len = Serial2.readBytes(Rx, lenRx);
-  DEBUG_PRINT(DEBUG_LAB "response-packet={");
-  for (auto i = 0; i < response_len; i++)
-  {
-    DEBUG_PRINTF(" 0x%X ", *(Rx + i));
-    if (i != response_len - 1)
+    while (serial2Lock)
     {
-      DEBUG_PRINTF(",");
+      // DEBUG_PRINT(".");
     }
-  }
-  DEBUG_PRINT("}");
-  DEBUG_PRINTLN();
-  serial2Lock = false;
-  
-  // Release the mutex so that the creating function can finish
-  xSemaphoreGive(mutex);
+    DEBUG_PRINTLN();
+    serial2Lock = true;
+
+    Serial2.flush();
+
+    for (auto i = 0; i < lenTx; i++)
+    {
+      Serial2.write(*(Tx + i));
+    }
+    DEBUG_PRINT(DEBUG_LAB "request-packet={");
+    for (auto i = 0; i < lenTx; i++)
+    {
+      DEBUG_PRINTF(" 0x%X ", *(Tx + i));
+      if (i != lenTx - 1)
+      {
+        DEBUG_PRINTF(",");
+      }
+    }
+    DEBUG_PRINT("}");
+    DEBUG_PRINTLN();
+    response_len = Serial2.readBytes(Rx, lenRx);
+    DEBUG_PRINT(DEBUG_LAB "response-packet={");
+    for (auto i = 0; i < response_len; i++)
+    {
+      DEBUG_PRINTF(" 0x%X ", *(Rx + i));
+      if (i != response_len - 1)
+      {
+        DEBUG_PRINTF(",");
+      }
+    }
+    DEBUG_PRINT("}");
+    DEBUG_PRINTLN();
+    serial2Lock = false;
+
+    // Release the mutex so that the creating function can finish
+    xSemaphoreGive(mutex);
   }
   return response_len;
 }
@@ -192,12 +193,16 @@ void serverConnectionHandleRoutine(void *pvParameters)
   //  DEBUG_PRINTLN(" Online");
   // end of pinging
 
-  DEBUG_PRINT(DEBUG_SERVER "Connecting Server UDP SOCKET : ");
+  DEBUG_PRINT(DEBUG_SERVER "Connecting Server TCP SOCKET : ");
   DEBUG_PRINT(SERVER_ADDR);
   DEBUG_PRINTLN(SERVER_PORT);
 
   bool established = false;
 
+  // while (!udp.connect(SERVER_ADDR, SERVER_PORT))
+  //   ;
+  // DEBUG_PRINT(DEBUG_SERVER "Connected to server.  ");
+  // DEBUG_PRINTF("IP="SERVER_ADDR" PORT=%d\n",SERVER_PORT)
   for (;;)
   {
     packetSize = 0;
@@ -224,11 +229,12 @@ void serverConnectionHandleRoutine(void *pvParameters)
     }
     vTaskDelay(xServerDelay);
     packetSize = udp.parsePacket();
+    // packetSize = udp.available();
     if (packetSize)
     {
-      DEBUG_PRINT(DEBUG_SERVER "Incoming PACKET SIZE=");
-      DEBUG_PRINTLN(packetSize);
       uint16_t serverReqLen = udp.read(serverPacket, BUFFER_SIZE);
+      DEBUG_PRINT(DEBUG_SERVER "Incoming PACKET SIZE=");
+      DEBUG_PRINTLN(serverReqLen);
       static const auto CRC_LEN = 2;
       if ((serverReqLen == (SERIAL_NO_LEN + 1 + CRC_LEN)) && (!established) && (serverPacket[0] == '$'))
       {

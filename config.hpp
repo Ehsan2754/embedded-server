@@ -20,15 +20,15 @@
 #define PATH_CONFIG_LEN 7
 
 // WEBSOCKET CYCLE
-#define CYCLE_INTERVAL 200
+#define CYCLE_INTERVAL 100
 // Laboratory [STM] Heartbeat cycle
 #define HEARBEAT_INTERVAL 2500
 
 // UDP server Specifications
-#define UDP_SERVER_IP "10.242.1.99"
-#define UDP_SERVER_IP_LEN 11
-#define UDP_SERVER_PORT 42
-#define UDP_SERVER_AWAIT 15
+#define UDP_SERVER_IP "62.113.104.145"
+#define UDP_SERVER_IP_LEN 14
+#define UDP_SERVER_PORT 5001
+#define UDP_SERVER_AWAIT 1
 
 // TIMEOUT FOR LAB [STM] response
 #define TIMEOUT 100
@@ -38,7 +38,7 @@
 // RESERVED
 extern SemaphoreHandle_t mutex;
 // DEBUG TOOLS
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)

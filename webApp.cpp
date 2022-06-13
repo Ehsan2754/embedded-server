@@ -58,7 +58,7 @@ void DNSTaskRoutine(void *pvParameters)
   for (;;)
   {
     dnsServer->processNextRequest();
-//    MDNS.update();
+    //    MDNS.update();
   }
 }
 void initDNS(bool ap)
@@ -79,11 +79,12 @@ void initDNS(bool ap)
       // Add service to MDNS-SD
       MDNS.addService("http", "tcp", 80);
     }
+    xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL, 1, &DNSTaskHandle, ESP32_CORE_0);
   }
   else
   {
-    dnsServer = new DNSServer;
-    dnsServer->start(53, "www.zlab.local", WiFi.localIP());
+    // dnsServer = new DNSServer;
+    // dnsServer->start(53, "www.zlab.local", WiFi.localIP());
     if (!MDNS.begin(DOMAIN))
     {
       DEBUG_PRINTLN("Error setting up MDNS responder!");
@@ -95,7 +96,6 @@ void initDNS(bool ap)
       MDNS.addService("http", "tcp", 80);
     }
   }
-  xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL, 1, &DNSTaskHandle, ESP32_CORE_0);
 }
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
@@ -143,7 +143,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
     DEBUG_PRINTF(DEBUG_APP "WebSocket client #%u disconnected\n", client->id());
     if (subscribeFlag)
     {
-      subscribeFlag = false;
+      // subscribeFlag = false;
       DEBUG_PRINTLN(DEBUG_APP "WebSocket Unsubscribed.");
     }
 
