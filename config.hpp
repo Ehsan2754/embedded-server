@@ -33,7 +33,7 @@
 // TIMEOUT FOR LAB [STM] response
 #define TIMEOUT 100
 // Buffer size for binary requests [e.g send-command, socket packets, laboratory responses]
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 4096
 
 // RESERVED
 extern SemaphoreHandle_t mutex;

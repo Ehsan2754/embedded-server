@@ -7,6 +7,7 @@
 #include <freertos/semphr.h>
 SemaphoreHandle_t mutex;
 bool serial2Lock = false;
+const TickType_t xServerDelay = UDP_SERVER_AWAIT / portTICK_PERIOD_MS;
 char SN[SERIAL_NO_LEN] = "";
 WiFiUDP udp;
 const uint16_t table[256] = {
@@ -79,6 +80,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     DEBUG_PRINT("}");
     DEBUG_PRINTLN();
     response_len = Serial2.readBytes(Rx, lenRx);
+    DEBUG_PRINTF("\t\t >> FRIST BYTE = 0x%X\n",*Rx);
     DEBUG_PRINT(DEBUG_LAB "response-packet={");
     for (auto i = 0; i < response_len; i++)
     {
@@ -173,7 +175,7 @@ const int SERVER_PORT = UDP_SERVER_PORT;
 static uint16_t packetSize = 0;
 static unsigned char serverPacket[BUFFER_SIZE];
 static unsigned char serverResponse[BUFFER_SIZE];
-const TickType_t xServerDelay = UDP_SERVER_AWAIT / portTICK_PERIOD_MS;
+
 void serverConnectionHandleRoutine(void *pvParameters)
 {
   // pinging

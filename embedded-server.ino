@@ -115,19 +115,17 @@ void setup()
     printWifiStatus();
     initDNS(false);
     initWebAppServer();
-    delay(1000);
     initWebSocket();
     xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
   }
   else
   {
     initWifiAP();
-    initDNS(true);
-    // initWebSocket();
-    // initWebAppServer();
-    // xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 2048, NULL, 2, &serverTaskHandle, ESP32_CORE_1);
-
-  }
+    initDNS(false);
+    initWebAppServer();
+    initWebSocket();
+    // xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
+}
 }
 
 void loop()

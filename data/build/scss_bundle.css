@@ -102,6 +102,12 @@ button:focus {
   width: 100%;
   margin-right: auto;
   padding: 2rem; }
+  @media screen and (max-width: 768px) {
+    .settings {
+      margin: 0 auto;
+      padding: 0.5rem;
+      min-width: 10rem;
+      max-width: 20rem; } }
   .settings .color-variant {
     width: 100%;
     margin: 0.5rem; }
@@ -117,6 +123,12 @@ button:focus {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0.5rem; }
+    @media screen and (max-width: 768px) {
+      .settings .setting-row {
+        text-align: center;
+        flex-direction: column;
+        margin: 0 auto;
+        margin-bottom: 0.2rem; } }
   .settings .setting-value {
     width: 12rem;
     display: flex;
@@ -125,21 +137,10 @@ button:focus {
     width: 100%; }
   .settings .setting-row > label {
     font-size: 1.5em; }
-
-@media screen and (max-width: 768px) {
-  .settings {
-    margin: 0 auto;
-    padding: 0.5rem;
-    min-width: 10rem;
-    max-width: 20rem; }
-    .settings .setting-row > label {
-      font-size: 1em;
-      margin: 0.5rem auto; }
-    .settings .setting-row {
-      text-align: center;
-      flex-direction: column;
-      margin: 0 auto;
-      margin-bottom: 0.2rem; } }
+    @media screen and (max-width: 768px) {
+      .settings .setting-row > label {
+        font-size: 1em;
+        margin: 0.5rem auto; } }
 
 .modal-content .header {
   font-size: 2em;
@@ -163,8 +164,11 @@ button:focus {
   flex: 1;
   width: 8rem;
   margin-top: 1rem; }
+  @media screen and (max-width: 768px) {
+    .modal-content .buttons button {
+      width: 5rem; } }
 
-.control-buttons > button {
+.control-buttons button {
   width: 4rem;
   height: 4rem;
   outline: none;
@@ -180,17 +184,17 @@ button:focus {
   -o-user-drag: none;
   user-drag: none; }
 
-.control-buttons > button:hover {
+.control-buttons button:hover {
   background-color: white; }
 
-.control-buttons > button:active {
+.control-buttons button:active {
   background-color: #c4c4c4; }
 
-.control-buttons > button:disabled {
+.control-buttons button:disabled {
   background-color: #c4c4c4;
   cursor: auto; }
 
-.control-buttons > button > img {
+.control-buttons button > img {
   height: 100%;
   object-fit: cover; }
 
@@ -198,7 +202,7 @@ button:focus {
   background-color: white;
   display: grid;
   grid-template: 1fr 2rem /  2rem 1fr;
-  grid-template-areas: "chart-label-y chart" ". chart-label-x";
+  grid-template-areas: "chart-label-y chart" ". chart-label-x";
   padding: 1rem;
   flex: 1;
   position: absolute;
@@ -232,8 +236,8 @@ button:focus {
 .chart {
   position: relative;
   grid-area: chart;
-  max-height: 99%;
-  max-width: 99%; }
+  min-width: 300px;
+  min-height: 300px; }
 
 .crosshair-label {
   position: absolute;
