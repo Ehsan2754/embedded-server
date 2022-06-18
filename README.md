@@ -1,5 +1,5 @@
 # ESP32server
-A Server based on ESP32 serving BLE and Web over network for ZARNITZA company
+Labroatory WebServer based on ESP32 serving BLE and Web over network for ZARNITZA company
 # Compile options
   1. ESP32 dev module
   2. Upload speed 921600
@@ -9,10 +9,19 @@ A Server based on ESP32 serving BLE and Web over network for ZARNITZA company
       * Flash mode qio
       * Flash size 4mb
       * Partition scheme default
-# Device Configuration
+
+# Frimware Upgrade
+1.  Choose your prefered version of the frimware from [here](./release).
+2.  Upload the frimware using [flash download tools](./flash_download_tool_3.9.2). Make sure the compile options are preserved. You may read the documention for usage of this tool [here](./flash_download_tool_3.9.2/doc).
+
+
+# Frimware Configuration
 Device predefined variables are modifiable.
 In [configuration file](./config.hpp), predifeined variable of the frimware may be  changed and rebuilt.
 > [CAUTION] **DO NOT** change the reserved configuration.
+## [File System Tools ](./lib/ESP32FS-1.0.zip) 
+Extract copy the jar file into the path ```{ARDUINO_PATH}/tools/ESP32FS/tool```
+> This tool is used for uploading the *root folder* into SPIFFS. In order upload into the file system, just follow this steps in ArduinoIDE [ tools > ESP32 Sketch Data Upload] 
 ## Configuration Details
 * Access-Point name
   ```
@@ -58,9 +67,15 @@ In [configuration file](./config.hpp), predifeined variable of the frimware may 
   ```
   #define BUFFER_SIZE 2048
   ```
-# Dependencies
+
+# Dependencies for developer
+## [Development Stack]
+  * [Arduino IDE](https://www.arduino.cc/en/software)
+  * [Espressif](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html)
+    >Installation of stable Espressif on ArduinoIDE
 ## [Libraries](./lib) 
 Install following Libraries in your ArduinoIDE according to the guide for installing library from a ZIP.
 ## [File System Tools](./lib/ESP32FS-1.0.zip) 
 Extract copy the jar file into the path ```{ARDUINO_PATH}/tools/ESP32FS/tool```
 > This tool is used for uploading the *root folder* into SPIFFS. In order upload into the file system, just follow this steps in ArduinoIDE [ tools > ESP32 Sketch Data Upload] 
+

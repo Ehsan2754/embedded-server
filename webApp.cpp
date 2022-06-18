@@ -117,8 +117,7 @@ void socketTaskRoutine(void *pvParameters)
     {
       DEBUG_PRINTLN(DEBUG_APP "WebSocket Broadcasting data.");
       ws->binaryAll(sensorResponse, sensorResponseLen);
-      vTaskDelay(xDelay
-      );
+      vTaskDelay(xDelay);
     }
     else
     {
@@ -213,6 +212,7 @@ void initWebAppServer()
             // Write file to save value
             writeFile(SPIFFS, passPath, pass.c_str());
           }
+
           // HTTP POST ip value
           if (p->name() == PARAM_INPUT_3) {
             ip = p->value().c_str();
@@ -229,6 +229,7 @@ void initWebAppServer()
             // Write file to save value
             writeFile(SPIFFS, gatewayPath, gateway.c_str());
           }
+          
           DEBUG_PRINTF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }

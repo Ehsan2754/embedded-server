@@ -2,7 +2,6 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <HardwareSerial.h>
-#include <ESP32Ping.h>
 #include "config.hpp"
 #include <freertos/semphr.h>
 SemaphoreHandle_t mutex;
@@ -68,7 +67,8 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     {
       Serial2.write(*(Tx + i));
     }
-    DEBUG_PRINT(DEBUG_LAB "request-packet={");
+    DEBUG_PRINTF(DEBUG_LAB "Request-packet Len=%d\n",lenTx);
+    DEBUG_PRINT(DEBUG_LAB "Request-packet={");
     for (auto i = 0; i < lenTx; i++)
     {
       DEBUG_PRINTF(" 0x%X ", *(Tx + i));
@@ -80,8 +80,9 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     DEBUG_PRINT("}");
     DEBUG_PRINTLN();
     response_len = Serial2.readBytes(Rx, lenRx);
-    DEBUG_PRINTF("\t\t >> FRIST BYTE = 0x%X\n",*Rx);
-    DEBUG_PRINT(DEBUG_LAB "response-packet={");
+    // DEBUG_PRINTF("\t\t >> FRIST BYTE = 0x%X\n",*Rx);
+    DEBUG_PRINTF(DEBUG_LAB "Response-packet Len=%d\n",response_len);
+    DEBUG_PRINT(DEBUG_LAB "Response-packet={");
     for (auto i = 0; i < response_len; i++)
     {
       DEBUG_PRINTF(" 0x%X ", *(Rx + i));
@@ -149,7 +150,7 @@ uint32_t obtainSerialNumber()
   }
   else
   {
-    DEBUG_PRINTF(DEBUG_LAB ">> SERIAL NUMBER : 0x%08X\n", SerialNumber);
+    DEBUG_PRINTF(DEBUG_LAB ">> SERIAL NUMBER : %08d\n", SerialNumber);
   }
   return SerialNumber;
 }
@@ -166,7 +167,7 @@ void getSerialNumber()
     intSN = obtainSerialNumber();
     delay(250);
   }
-  sprintf(SN, "%08X", intSN);
+  sprintf(SN, "%08d", intSN);
   DEBUG_PRINT(DEBUG_LAB "REGISTERED-SERIAL:=");
   DEBUG_PRINTLN(SN);
 }
