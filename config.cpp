@@ -168,7 +168,7 @@ void getSerialNumber()
     delay(250);
   }
   intSN = intSN>>16;
-  sprintf(SN, "%08d", intSN);
+  sprintf(SN, "%05d", intSN); // FFFF = 65535 so max digits in DEC is 5
   DEBUG_PRINT(DEBUG_LAB "REGISTERED-SERIAL:=");
   DEBUG_PRINTLN(SN);
 }
