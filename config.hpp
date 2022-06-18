@@ -20,7 +20,7 @@
 #define PATH_CONFIG_LEN 7
 
 // WEBSOCKET CYCLE
-#define CYCLE_INTERVAL 100
+#define CYCLE_INTERVAL 250
 // Laboratory [STM] Heartbeat cycle
 #define HEARBEAT_INTERVAL 2500
 
@@ -47,7 +47,7 @@ extern SemaphoreHandle_t mutex;
 #define DEBUG_LAB "[LAB LOG]::"
 #define DEBUG_APP "[APP LOG]::"
 #define DEBUG_INFO "[INFO LOG]::"
-#else
+#elseА
 #define DEBUG_PRINT(...)
 #define DEBUG_PRINTLN(...)
 #define DEBUG_PRINTF(...)
