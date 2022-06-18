@@ -63,7 +63,7 @@ extern bool serial2Lock;
 #define ESP32_CORE_0 0
 #define ESP32_CORE_1 1
 
-#define SERIAL_NO_LEN 8
+#define SERIAL_NO_LEN 5
 extern char SN[SERIAL_NO_LEN];
 #define SERIAL_NO "0000"
 #define USERNAME "admin"
