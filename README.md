@@ -9,6 +9,15 @@ Labroatory WebServer based on ESP32 serving BLE and Web over network for ZARNITZ
       * Flash mode qio
       * Flash size 4mb
       * Partition scheme default
+# Device Modes
+## SERVER 
+http://62.113.104.145/?sn=<SERIALNUMBER>
+e.g: 
+http://62.113.104.145/?sn=16682
+
+## Local
+http://192.168.4.1/
+http://192.168.4.1/config
 
 # Frimware Upgrade
 1.  Choose your prefered version of the frimware from [here](./release).

@@ -150,7 +150,7 @@ uint32_t obtainSerialNumber()
   }
   else
   {
-    DEBUG_PRINTF(DEBUG_LAB ">> SERIAL NUMBER : %08d\n", SerialNumber);
+    DEBUG_PRINTF(DEBUG_LAB ">> SERIAL NUMBER : %d\n", SerialNumber);
   }
   return SerialNumber;
 }
@@ -167,7 +167,8 @@ void getSerialNumber()
     intSN = obtainSerialNumber();
     delay(250);
   }
-  sprintf(SN, "%08d", intSN);
+  intSN = intSN>>16;
+  sprintf(SN, "%d", intSN);
   DEBUG_PRINT(DEBUG_LAB "REGISTERED-SERIAL:=");
   DEBUG_PRINTLN(SN);
 }
