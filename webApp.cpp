@@ -281,7 +281,7 @@ void initWifiAP()
   DEBUG_PRINTLN(SSID_AP);
 
   // NULL sets an open Access Point
-  WiFi.softAP(SSID_AP);
+  WiFi.softAP(SSID_AP,"1234567890");
 
   IPAddress IP = WiFi.softAPIP();
   DEBUG_PRINT(DEBUG_INFO "AP IP address: ");

@@ -20,7 +20,7 @@
 #define PATH_CONFIG_LEN 7
 
 // WEBSOCKET CYCLE
-#define CYCLE_INTERVAL 250
+#define CYCLE_INTERVAL 10
 // Laboratory [STM] Heartbeat cycle
 #define HEARBEAT_INTERVAL 2500
 

@@ -114,8 +114,8 @@ void setup()
     
     printWifiStatus();
     // initDNS(false);
-    initWebAppServer();
-    initWebSocket();
+    //initWebAppServer();
+    //66uinitWebSocket();
     xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
   }
   else
@@ -124,7 +124,7 @@ void setup()
     // initDNS(false);
     initWebAppServer();
     initWebSocket();
-    xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
+    //xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
 }
 }
 
