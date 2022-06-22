@@ -1,4 +1,4 @@
-##Установка##
+## Установка
 
 Установи arduino IDE [https://www.arduino.cc/en/software](https://www.arduino.cc/en/software)
 
@@ -14,7 +14,7 @@
 
 Перезипусти IDE
 
-##Прошивка##
+## Прошивка
 
 нажать галку, если все собралось, то ок.
 
