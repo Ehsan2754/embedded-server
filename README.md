@@ -1,3 +1,31 @@
+##Установка##
+
+Установи arduino IDE [https://www.arduino.cc/en/software](https://www.arduino.cc/en/software)
+
+Добавь ссылку https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json в: Файл->Настройки->Дополнительные ссылки...
+
+Зайди в инструменты - Плата:... - Менеджер Плат
+
+В поиске вбей esp32 и установи
+
+Положи содержимое архива в репе C:\embedded-server\lib\ESPAsyncWebServer.zip в папку библиотек ардумны C:\Program Files (x86)\Arduino\libraries folder 
+
+Положи содежимое архива ESP32FS-1.0.zip в папку C:\Program Files (x86)\Arduino\tools
+
+Перезипусти IDE
+
+##Прошивка##
+
+нажать галку, если все собралось, то ок.
+
+выбрать правильный ком порт
+
+нажать кнопку со стрелкой
+
+чтобы залить содержимое сайта нужно зайти: Инструменты -> ESP32 Sketch Data Upload
+
+
+
 # ESP32server
 Labroatory WebServer based on ESP32 serving BLE and Web over network for ZARNITZA company
 # Compile options
