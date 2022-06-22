@@ -47,7 +47,7 @@ extern SemaphoreHandle_t mutex;
 #define DEBUG_LAB "[LAB LOG]::"
 #define DEBUG_APP "[APP LOG]::"
 #define DEBUG_INFO "[INFO LOG]::"
-#elseА
+#else
 #define DEBUG_PRINT(...)
 #define DEBUG_PRINTLN(...)
 #define DEBUG_PRINTF(...)
