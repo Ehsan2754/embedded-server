@@ -10,13 +10,19 @@
 
 Положи содержимое архива в репе C:\embedded-server\lib\ESPAsyncWebServer.zip в папку библиотек ардумны C:\Program Files (x86)\Arduino\libraries folder 
 
+![](img/libraries_folder.jpg)
+
 Положи содежимое архива ESP32FS-1.0.zip в папку C:\Program Files (x86)\Arduino\tools
+
+![](img/tools_folder.jpg)
 
 Перезипусти IDE
 
 ## Прошивка
 
 Инструменты -> Платы:.. -> ESP32 Arduino -> ESP32 Dev Module
+
+![](img/board_choose.jpg)
 
 нажать галку, если все собралось, то ок.
 
