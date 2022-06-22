@@ -43,9 +43,25 @@
 
 ![](img/download.png)
 
+## Загрузка UI
+
+содержимое UI находится в папке C:\embedded-server\data
+
 чтобы залить содержимое сайта нужно зайти: Инструменты -> ESP32 Sketch Data Upload
 
 ![](img/data_upload.png)
+
+при обновлении содержимого набор файлов не должен меняться, например файлы типа bundle.js.map нужно удалить
+# PINOUT
+
+Чтобы войти в режим программирования нужно зажать BOOT и EN, а потом отпустить сначала EN потом BOOT
+
+![](img/esp32.jpg)
+
+
+
+
+
 
 # ESP32server
 Labroatory WebServer based on ESP32 serving BLE and Web over network for ZARNITZA company
