@@ -59,8 +59,8 @@ void setup()
   disableCore1WDT();
   Serial.begin(115200);
   Serial.setTimeout(TIMEOUT);
-  Serial2.begin(115200);
-  Serial2.setTimeout(TIMEOUT);
+  LAB_SERIAL.begin(LAB_BAUDRATE);
+  LAB_SERIAL.setTimeout(TIMEOUT);
   getSerialNumber();
   initSPIFFS();
 

@@ -2,6 +2,11 @@
 #define __CONFIG_HPP__
 
 
+
+// Serial Port For the Lab
+#define LAB_SERIAL Serial1
+#define LAB_BAUDRATE 115200
+
 // Access-Point name
 #define SSID_AP "zlab"
 #define SSID_AP_LEN 4
@@ -58,7 +63,7 @@ extern SemaphoreHandle_t mutex;
 #endif
 
 // Laboratory Lock [STM Serial Lock]
-extern bool serial2Lock;
+extern bool labLock;
 
 #define ESP32_CORE_0 0
 #define ESP32_CORE_1 1

@@ -5,7 +5,7 @@
 #include "config.hpp"
 #include <freertos/semphr.h>
 SemaphoreHandle_t mutex;
-bool serial2Lock = false;
+bool labLock = false;
 const TickType_t xServerDelay = UDP_SERVER_AWAIT / portTICK_PERIOD_MS;
 char SN[SERIAL_NO_LEN] = "";
 WiFiUDP udp;
@@ -50,22 +50,22 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
   *Rx = 0x00;
   if (xSemaphoreTake(mutex, TIMEOUT) == pdTRUE)
   {
-    if (serial2Lock)
+    if (labLock)
     {
       DEBUG_PRINTLN(DEBUG_LAB "Waiting for device to get free....");
     }
-    while (serial2Lock)
+    while (labLock)
     {
       // DEBUG_PRINT(".");
     }
     DEBUG_PRINTLN();
-    serial2Lock = true;
+    labLock = true;
 
-    Serial2.flush();
+    LAB_SERIAL.flush();
 
     for (auto i = 0; i < lenTx; i++)
     {
-      Serial2.write(*(Tx + i));
+      LAB_SERIAL.write(*(Tx + i));
     }
     DEBUG_PRINTF(DEBUG_LAB "Request-packet Len=%d\n",lenTx);
     DEBUG_PRINT(DEBUG_LAB "Request-packet={");
@@ -79,7 +79,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     }
     DEBUG_PRINT("}");
     DEBUG_PRINTLN();
-    response_len = Serial2.readBytes(Rx, lenRx);
+    response_len = LAB_SERIAL.readBytes(Rx, lenRx);
     // DEBUG_PRINTF("\t\t >> FRIST BYTE = 0x%X\n",*Rx);
     DEBUG_PRINTF(DEBUG_LAB "Response-packet Len=%d\n",response_len);
     DEBUG_PRINT(DEBUG_LAB "Response-packet={");
@@ -93,7 +93,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     }
     DEBUG_PRINT("}");
     DEBUG_PRINTLN();
-    serial2Lock = false;
+    labLock = false;
 
     // Release the mutex so that the creating function can finish
     xSemaphoreGive(mutex);

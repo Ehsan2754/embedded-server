@@ -97,6 +97,10 @@ In [configuration file](./config.hpp), predifeined variable of the frimware may 
 Extract copy the jar file into the path ```{ARDUINO_PATH}/tools/ESP32FS/tool```
 > This tool is used for uploading the *root folder* into SPIFFS. In order upload into the file system, just follow this steps in ArduinoIDE [ tools > ESP32 Sketch Data Upload] 
 ## Configuration Details
+* Serial Port For the Lab
+  ```#define LAB_SERIAL Serial1
+  #define LAB_BAUDRATE 115200
+  ```
 * Access-Point name
   ```
   #define SSID_AP "zlab" 
