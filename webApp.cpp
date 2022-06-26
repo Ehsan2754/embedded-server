@@ -271,17 +271,18 @@ void initWebAppServer()
   server.begin();
 }
 
-// static char ssid_ap_str[SSID_AP_LEN + SERIAL_NO_LEN];
+static char ssid_ap_str[SSID_AP_LEN + SERIAL_NO_LEN];
 void initWifiAP()
 {
-  //  sprintf(ssid_ap_str, "%s%s", SSID_AP, SN);
+  WiFi.mode(WIFI_AP);
+   sprintf(ssid_ap_str, "%s%s", SSID_AP, SN);
   DEBUG_PRINTLN(DEBUG_INFO "WiFi Access-Point initialized.");
   // Connect to Wi-Fi network with SSID and password
   DEBUG_PRINT(DEBUG_INFO "Setting AP (Access Point) SSID=");
-  DEBUG_PRINTLN(SSID_AP);
+  DEBUG_PRINTLN(ssid_ap_str);
 
   // NULL sets an open Access Point
-  WiFi.softAP(SSID_AP,"1234567890");
+  WiFi.softAP(ssid_ap_str,PASSWORD_AP);
 
   IPAddress IP = WiFi.softAPIP();
   DEBUG_PRINT(DEBUG_INFO "AP IP address: ");

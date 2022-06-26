@@ -4,12 +4,14 @@
 
 
 // Serial Port For the Lab
-#define LAB_SERIAL Serial1
+#define LAB_SERIAL Serial2
 #define LAB_BAUDRATE 115200
 
 // Access-Point name
 #define SSID_AP "zlab"
 #define SSID_AP_LEN 4
+#define PASSWORD_AP "1234567890"
+#define PASSWORD_AP_LEN 10
 
 // DNS RESOLVE DOMAIN e.g http://DOMAIN.local
 #define DOMAIN "zlab"
