@@ -19,11 +19,17 @@
 
 ![](img/libraries_folder.jpg)
 
-Положи содежимое архива ESP32FS-1.0.zip в папку C:\Program Files (x86)\Arduino\tools
+Положи содежимое папки ESP32FS-1.0 (папку "ESP32FS") из архива ESP32FS-1.0.zip в папку C:\Program Files (x86)\Arduino\tools
 
 ![](img/tools_folder.jpg)
 
 Перезипусти IDE
+
+Скачать этот репозиторий, переименовать папку в "embedded-server" если она еще не переименована.
+
+Открыть с помощью Arduino IDE файл embedded-server.ino в корне скачанного репозитория
+
+Проект готов к работе
 
 ## Прошивка
 
@@ -46,6 +52,8 @@
 ## Загрузка UI
 
 содержимое UI находится в папке C:\embedded-server\data
+
+перевести ESP в режим загрузчика
 
 чтобы залить содержимое сайта нужно зайти: Инструменты -> ESP32 Sketch Data Upload
 
