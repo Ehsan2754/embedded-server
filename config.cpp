@@ -67,7 +67,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     {
       LAB_SERIAL.write(*(Tx + i));
     }
-    DEBUG_PRINTF(DEBUG_LAB "Request-packet Len=%d\n",lenTx);
+    DEBUG_PRINTF(DEBUG_LAB "Request-packet Len=%d\n", lenTx);
     DEBUG_PRINT(DEBUG_LAB "Request-packet={");
     for (auto i = 0; i < lenTx; i++)
     {
@@ -81,7 +81,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     DEBUG_PRINTLN();
     response_len = LAB_SERIAL.readBytes(Rx, lenRx);
     // DEBUG_PRINTF("\t\t >> FRIST BYTE = 0x%X\n",*Rx);
-    DEBUG_PRINTF(DEBUG_LAB "Response-packet Len=%d\n",response_len);
+    DEBUG_PRINTF(DEBUG_LAB "Response-packet Len=%d\n", response_len);
     DEBUG_PRINT(DEBUG_LAB "Response-packet={");
     for (auto i = 0; i < response_len; i++)
     {
@@ -116,14 +116,14 @@ uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
   DEBUG_PRINTF(DEBUG_LAB "CRC-16/MODBUS = 0x%X\n", (uint16_t)(crc << 8 | crc >> 8));
   return crc << 8 | crc >> 8;
 }
-uint32_t obtainSerialNumber()
+uint16_t obtainSerialNumber()
 {
   DEBUG_PRINTLN(DEBUG_LAB "Obtaining  Serial Number.");
   unsigned char GET_HW_CONFIG_Tx[] = {0xAA, 0x06, 0x00, 0x83, 0x80, 0x5C};
   unsigned char RESP_BUFFER[128];
   auto LenResp = transmitCommand(GET_HW_CONFIG_Tx, 6, RESP_BUFFER, 128);
   auto expectedLen = 66;
-  uint32_t SerialNumber = 0;
+  uint16_t SerialNumber = 0;
   if (!LenResp)
   {
     DEBUG_PRINTF(DEBUG_LAB "Device is off.\n", LenResp, expectedLen);
@@ -142,7 +142,7 @@ uint32_t obtainSerialNumber()
   }
   else
   {
-    SerialNumber = (RESP_BUFFER[4] << 24) | (RESP_BUFFER[5] << 16) | (RESP_BUFFER[6] << 8) | (RESP_BUFFER[7]);
+    SerialNumber = (RESP_BUFFER[5] << 8) | (RESP_BUFFER[4]);
   }
   if (!SerialNumber)
   {
@@ -156,7 +156,7 @@ uint32_t obtainSerialNumber()
 }
 void getSerialNumber()
 {
-  uint32_t intSN = 0x00;
+  uint16_t intSN = 0x00;
   for (uint8_t i = 0; i < 50; i++)
   {
     if (intSN)
@@ -167,7 +167,7 @@ void getSerialNumber()
     intSN = obtainSerialNumber();
     delay(250);
   }
-  intSN = intSN>>16;
+
   sprintf(SN, "%05d", intSN); // FFFF = 65535 so max digits in DEC is 5
   DEBUG_PRINT(DEBUG_LAB "REGISTERED-SERIAL:=");
   DEBUG_PRINTLN(SN);

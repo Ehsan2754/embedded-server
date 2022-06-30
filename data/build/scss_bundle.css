@@ -93,6 +93,15 @@ button:focus {
   height: 100%;
   width: 100%; }
 
+.m-auto {
+  margin: auto; }
+
+.mr-auto {
+  margin-right: auto; }
+
+.ml-auto {
+  margin-left: auto; }
+
 .align-center {
   align-items: center; }
 
@@ -111,7 +120,7 @@ button:focus {
   .settings .color-variant {
     width: 100%;
     margin: 0.5rem; }
-  .settings select, .settings input {
+  .settings select, .settings input:not([type=checkbox]) {
     max-width: 12rem;
     height: 2.5rem;
     border: 1px solid #333333;
@@ -319,3 +328,14 @@ td {
     border: 1px solid transparent;
     background: transparent;
     box-shadow: inset 0 0 3px 3px #7c7c7c; } }
+
+input.blue-button[type=submit], button.blue-button {
+  border-radius: 2rem;
+  border: none;
+  color: white;
+  font-size: 1.25em;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px;
+  background: #3ab8ff;
+  line-height: 0px; }
