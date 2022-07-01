@@ -17,6 +17,9 @@
 #define DOMAIN "zlab"
 #define DOMAIN_LEN 4
 
+// PIN Configuration
+#define PIN_LED 2     // On board LED [server establishment indicator]
+
 // WebApp and server endpoints
 #define PATH_SENDCOMMAND "/api/lab/send-command"
 #define PATH_SENDCOMMAND_LEN 22
@@ -77,7 +80,6 @@ extern char SN[SERIAL_NO_LEN];
 #define PASSWORD SN
 // PIN Configuration
 #define PIN_TRIGGER 0 // BOOT PIN which will reset the ssid
-#define PIN_LED 2     // On board LED
 // Labortory[STM] Serial Pins
 #define RXD2 16
 #define TXD2 17
