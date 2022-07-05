@@ -3,12 +3,14 @@
 #include <SPIFFS.h>
 #include "fileSystem.hpp"
 #include "webApp.hpp"
+#include "bt.hpp"
 #include "config.hpp"
 
 // Timer variables
 const long interval = 10 * 1000; // interval to wait for Wi-Fi connection (milliseconds)
 unsigned long previousMillis = 0;
 TaskHandle_t serverTaskHandle;
+TaskHandle_t btTaskHandle;
 IPAddress localIP;
 IPAddress localGateway;
 IPAddress subnet(255, 255, 0, 0);
@@ -109,6 +111,12 @@ void setup()
   {
     DEBUG_PRINTLN(DEBUG_INFO "No Gateway!");
   }
+
+
+
+  initBT();
+  xTaskCreatePinnedToCore(btHandleRoutine, "btHandleRoutine", 4096, NULL, 3, &btTaskHandle, ESP32_CORE_0);
+  /*
   if (initWiFi())
   {
     
@@ -126,6 +134,7 @@ void setup()
     initWebSocket();
     //xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
 }
+*/
 }
 
 void loop()

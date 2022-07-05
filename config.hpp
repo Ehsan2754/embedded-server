@@ -13,6 +13,10 @@
 #define PASSWORD_AP "1234567890"
 #define PASSWORD_AP_LEN 10
 
+//Bluetooth configuration
+#define BT_NAME "zlab" 
+#define BT_NAME_LEN 4 
+
 // DNS RESOLVE DOMAIN e.g http://DOMAIN.local
 #define DOMAIN "zlab"
 #define DOMAIN_LEN 4
@@ -48,7 +52,7 @@
 // RESERVED
 extern SemaphoreHandle_t mutex;
 // DEBUG TOOLS
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
@@ -70,6 +74,11 @@ extern SemaphoreHandle_t mutex;
 // Laboratory Lock [STM Serial Lock]
 extern bool labLock;
 
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
+// CORE ENUMERATION
 #define ESP32_CORE_0 0
 #define ESP32_CORE_1 1
 

@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <HardwareSerial.h>
-#include "config.hpp"
 #include <freertos/semphr.h>
+#include "config.hpp"
 SemaphoreHandle_t mutex;
 bool labLock = false;
 const TickType_t xServerDelay = UDP_SERVER_AWAIT / portTICK_PERIOD_MS;
@@ -56,7 +56,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     }
     while (labLock)
     {
-      // DEBUG_PRINT(".");
+      DEBUG_PRINT(".");
     }
     DEBUG_PRINTLN();
     labLock = true;
@@ -100,7 +100,6 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
   }
   return response_len;
 }
-
 uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
 {
 
