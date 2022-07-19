@@ -115,7 +115,7 @@ void setup()
 
 
   initBT();
-  xTaskCreatePinnedToCore(btHandleRoutine, "btHandleRoutine", 4096, NULL, 3, &btTaskHandle, ESP32_CORE_0);
+  // xTaskCreatePinnedToCore(btHandleRoutine, "btHandleRoutine", 4096, NULL, 3, &btTaskHandle, ESP32_CORE_0);
   /*
   if (initWiFi())
   {

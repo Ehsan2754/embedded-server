@@ -1,8 +1,7 @@
 #ifndef __CONFIG_HPP__
 #define __CONFIG_HPP__
 
-
-
+#include <HardwareSerial.h>
 // Serial Port For the Lab
 #define LAB_SERIAL Serial2
 #define LAB_BAUDRATE 115200
@@ -15,7 +14,10 @@
 
 //Bluetooth configuration
 #define BT_NAME "zlab" 
-#define BT_NAME_LEN 4 
+#define BT_NAME_LEN 4
+#define bleServerName "CHEM10817"
+#define SERVICE_UUID "0000ffe0-0000-1000-8000-00805f9b34fb"
+#define CHARACTERISTIC_UUID "0000ffe1-0000-1000-8000-00805f9b34fb" 
 
 // DNS RESOLVE DOMAIN e.g http://DOMAIN.local
 #define DOMAIN "zlab"
@@ -74,9 +76,7 @@ extern SemaphoreHandle_t mutex;
 // Laboratory Lock [STM Serial Lock]
 extern bool labLock;
 
-#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
-#endif
+
 
 // CORE ENUMERATION
 #define ESP32_CORE_0 0
