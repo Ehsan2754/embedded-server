@@ -75,7 +75,10 @@ class MyServerCallbacks : public BLEServerCallbacks
         pServer->getAdvertising()->start();
     }
 };
-
+void deinitBT()
+{
+    BLEDevice::deinit(true);
+}
 void initBT()
 {
     char devname[10];

@@ -4,6 +4,7 @@
 
 extern bool deviceConnected;
 void initBT();
+void deinitBT();
 void btHandleRoutine(void *pvParameters);
 
 #endif//__BT_HPP__

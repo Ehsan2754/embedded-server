@@ -28,9 +28,9 @@
 ## Прошивка
 
 Инструменты -> Платы:.. -> ESP32 Arduino -> ESP32 Dev Module
+![](img/data_upload.png)
 
-![](img/board_choose.jpg)
-
+<!-- ![](img/board_choose.jpg) -->
 нажать галку, если все собралось, то ок.
 
 ![](img/check.png)
@@ -66,14 +66,7 @@
 # ESP32server
 Labroatory WebServer based on ESP32 serving BLE and Web over network for ZARNITZA company
 # Compile options
-  1. ESP32 dev module
-  2. Upload speed 921600
-  3. Flash configurations:    
-      * Cpu speed 240 mhz
-      * Flash speed 80 mhz
-      * Flash mode qio
-      * Flash size 4mb
-      * Partition scheme default
+![](docs\compileparameters.png)
 # Device Modes
 ## SERVER 
 http://62.113.104.145/?sn=<SERIALNUMBER>

@@ -7,7 +7,8 @@
 #include "config.hpp"
 
 // Timer variables
-const long interval = 10 * 1000; // interval to wait for Wi-Fi connection (milliseconds)
+const long interval = 10 * 1000;    // interval to wait for Wi-Fi connection (milliseconds)
+const long BLEinterval = 90 * 1000; // interval to wait for BLE connection (milliseconds)
 unsigned long previousMillis = 0;
 TaskHandle_t serverTaskHandle;
 TaskHandle_t btTaskHandle;
@@ -65,22 +66,43 @@ void setup()
   LAB_SERIAL.begin(LAB_BAUDRATE);
   LAB_SERIAL.setTimeout(TIMEOUT);
   getSerialNumber();
-  
-  
-  
+
   // Set GPIO 2 as an OUTPUT
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, LOW);
 
-  pinMode(PIN_TRIGGER, INPUT);
-  auto bState = digitalRead(PIN_TRIGGER);
-  delay(50);
-  bState += digitalRead(PIN_TRIGGER);
-  if (bState == 0)
+  // pinMode(PIN_TRIGGER, INPUT);
+  // auto bState = digitalRead(PIN_TRIGGER);
+  // delay(50);
+  // bState += digitalRead(PIN_TRIGGER);
+  initBT();
+  // DEBUG_PRINTLN(DEBUG_INFO "Waiting for BLE clinet...");
+
+  unsigned long currentMillis = millis();
+  previousMillis = currentMillis;
+
+  while (currentMillis - previousMillis <= BLEinterval)
   {
-    initBT();
+    currentMillis = millis();
+    if (deviceConnected)
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "BLE MODE ACTIVATED");
+      for (;;)
+      {
+      }
+    }
+    else if ((currentMillis - previousMillis) % 10000 == 0)
+    {
+      DEBUG_PRINTF(DEBUG_INFO "BLE SERVER WAITING FOR %d ms\n", currentMillis - previousMillis);
+    }
   }
-  else
+  DEBUG_PRINTLN(DEBUG_INFO "NO CLIENT ON BLE. Turning off the BT");
+  deinitBT();
+  // if (bState == 0)
+  // {
+
+  // }
+//  else
   {
     initSPIFFS();
     // Load values saved in SPIFFS
