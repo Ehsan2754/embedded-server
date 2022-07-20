@@ -1,4 +1,4 @@
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <WiFi.h>
 #include <SPIFFS.h>
 #include "fileSystem.hpp"
@@ -115,29 +115,23 @@ void setup()
 
 
   initBT();
-  // xTaskCreatePinnedToCore(btHandleRoutine, "btHandleRoutine", 4096, NULL, 3, &btTaskHandle, ESP32_CORE_0);
-  /*
+  
   if (initWiFi())
   {
     
-    printWifiStatus();
-    // initDNS(false);
-    //initWebAppServer();
-    //66uinitWebSocket();
-    xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
+   printWifiStatus();
+   xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
   }
   else
   {
     initWifiAP();
-    // initDNS(false);
     initWebAppServer();
     initWebSocket();
-    //xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
-}
-*/
+    
+  }
+
 }
 
 void loop()
 {
-  // dnsServer->processNextRequest();
 }

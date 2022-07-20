@@ -29,7 +29,7 @@ static char socket_subscribe_str[PATH_SUBSCRIBE_LEN + SERIAL_NO_LEN];
 static char domain_str[DOMAIN_LEN + SERIAL_NO_LEN];
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
-DNSServer *dnsServer = new DNSServer;
+//DNSServer *dnsServer = new DNSServer;
 AsyncWebSocket *ws = new AsyncWebSocket(PATH_SOCKET);
 const TickType_t xDelay = CYCLE_INTERVAL / portTICK_PERIOD_MS;
 const TickType_t heartbeatDelay = HEARBEAT_INTERVAL / portTICK_PERIOD_MS;
@@ -254,18 +254,7 @@ void initWebAppServer()
       });
 
 
-  // server.onNotFound([](AsyncWebServerRequest *request)
-  //                   {
-  //                     DEBUG_PRINT(DEBUG_APP "NOT FOUND REQUEST!");
-  //                     DEBUG_PRINTLN(request->url());
-  // if(request->url()!="/dashboard" ||
-  // request->url()!=PATH_SENDCOMMAND||
-  // request->url()!=PATH_SUBSCRIBE||
-  // request->url()!="/config"||
-  // request->url()!="/"
-  // )
-  // {request->send(SPIFFS, "/404.html", "text/html"); }
-  // });
+
 
   DEBUG_PRINTLN(DEBUG_APP "WebApp server initialized.");
   server.begin();
@@ -288,68 +277,4 @@ void initWifiAP()
   DEBUG_PRINT(DEBUG_INFO "AP IP address: ");
   DEBUG_PRINTLN(IP);
 
- // Web Server Root URL
-//  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-//            { request->send(SPIFFS, "/admin.html", "text/html"); });
-
-//  server.serveStatic("/", SPIFFS, "/");
-
-//  server.on("/", HTTP_POST, [](AsyncWebServerRequest *request)
-//            {
-//      int params = request->params();
-//      for(int i=0;i<params;i++){
-//        AsyncWebParameter* p = request->getParam(i);
-//        // HTTP POST ssid value
-//        if(p->isPost()){
-//          if (p->name() == PARAM_INPUT_1) {
-//            ssid = p->value().c_str();
-//            DEBUG_PRINT(DEBUG_INFO"SSID set to: ");
-//            DEBUG_PRINTLN(ssid);
-//            // Write file to save value
-//            writeFile(SPIFFS, ssidPath, ssid.c_str());
-//          }
-//          // HTTP POST pass value
-//          if (p->name() == PARAM_INPUT_2) {
-//            pass = p->value().c_str();
-//            DEBUG_PRINT(DEBUG_INFO"Password set to: ");
-//            DEBUG_PRINTLN(pass);
-//            // Write file to save value
-//            writeFile(SPIFFS, passPath, pass.c_str());
-//          }
-//          // HTTP POST ip value
-//          if (p->name() == PARAM_INPUT_3) {
-//            ip = p->value().c_str();
-//            DEBUG_PRINT(DEBUG_INFO"IP Address set to: ");
-//            DEBUG_PRINTLN(ip);
-//            // Write file to save value
-//            writeFile(SPIFFS, ipPath, ip.c_str());
-//          }
-//          // HTTP POST gateway value
-//          if (p->name() == PARAM_INPUT_4) {
-//            gateway = p->value().c_str();
-//            DEBUG_PRINT(DEBUG_INFO"Gateway set to: ");
-//            DEBUG_PRINTLN(gateway);
-//            // Write file to save value
-//            writeFile(SPIFFS, gatewayPath, gateway.c_str());
-//          }
-//          //DEBUG_PRINTF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-//        }
-//      }
-//      request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + ip);
-//      delay(3000);
-//      ESP.restart(); });
-
- // server.onNotFound([](AsyncWebServerRequest *request)
- //                   {
- //                     DEBUG_PRINT(DEBUG_APP "NOT FOUND REQUEST!");
- //                     DEBUG_PRINTLN(request->url());
- // if(request->url()!="/dashboard" ||
- // request->url()!=PATH_SENDCOMMAND||
- // request->url()!=PATH_SUBSCRIBE||
- // request->url()!="/config"||
- // request->url()!="/"
- // )
- // {request->send(SPIFFS, "/404.html", "text/html"); } });
-//  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER); // only when requested from AP
-//  server.begin();
 }

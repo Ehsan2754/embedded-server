@@ -8,15 +8,19 @@
 
 bool deviceConnected = false;
 bool requestFlag = false;
-static uint8_t resp[BUFFER_SIZE];
-static uint8_t CUD_value[17] = "Characteristic 6";
+
+uint8_t CUD_value[17] = "Characteristic 6";
 
 static uint8_t bt_req[BUFFER_SIZE];
 static uint8_t bt_res[BUFFER_SIZE];
 
 // Characteristic and Descriptor
-BLECharacteristic *bleNotifyCharacteristics=NULL;
-BLEDescriptor bleCUD_Descriptor(BLEUUID((uint16_t)0x2901));
+// BLEServer *bleServer = NULL;
+// BLEService *bleService = NULL;
+// BLECharacteristic *bleCharacteristics = NULL;
+// BLEAdvertising *bleAdvertising = NULL;
+
+BLEDescriptor cudDescriptor(BLEUUID((uint16_t)0x2901));
 
 // Setup callbacks onWrite
 class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
@@ -43,8 +47,8 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
                         auto pktLen = (len < (20 * (i + 1))) ? len % 20 : 20;
                         DEBUG_PRINTF("\t>>Packet sent from byte %d to %d\n", startPtr, startPtr + pktLen);
                         DEBUG_PRINTF("\t\t PTR=[MEM@%d,MEM@%d]\n", bt_res + startPtr, bt_res + startPtr + pktLen);
-                        bleNotifyCharacteristics->setValue(bt_res + startPtr, pktLen);
-                        bleNotifyCharacteristics->notify();
+                        pCharacteristic->setValue(bt_res + startPtr, pktLen);
+                        pCharacteristic->notify();
                     }
                 }
             }
@@ -56,9 +60,10 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
 // Setup callbacks onConnect and onDisconnect
 class MyServerCallbacks : public BLEServerCallbacks
 {
-    void onConnect(BLEServer *pServer)
+    void onConnect(BLEServer *pServer, esp_ble_gatts_cb_param_t *param)
     {
         deviceConnected = true;
+        pServer->updateConnParams(param->connect.remote_bda, 0x06, 0x12, 0, 100);
         DEBUG_PRINTLN("DEVICE CONNECTED!");
         DEBUG_PRINTF("\tNUMBER OF CONNECTED DEVICES = %d\n", pServer->getConnectedCount() + 1);
     }
@@ -83,28 +88,30 @@ void initBT()
 
     // Create the BLE Service
     BLEService *bleService = bleServer->createService(SERVICE_UUID);
-    bleNotifyCharacteristics = new BLECharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
-                                                                    BLECharacteristic::PROPERTY_WRITE |
-                                                                    BLECharacteristic::PROPERTY_WRITE_NR |
-                                                                    BLECharacteristic::PROPERTY_NOTIFY);
-
+    
     // Create BLE Characteristics and Create  BLE Descriptors
-    bleNotifyCharacteristics->setCallbacks(new MyCharacteristicCallbacks());
-    bleService->addCharacteristic(bleNotifyCharacteristics);
-    bleCUD_Descriptor.setValue(CUD_value, 16);
-    bleNotifyCharacteristics->addDescriptor(&bleCUD_Descriptor);
-    bleNotifyCharacteristics->addDescriptor(new BLE2902());
+    BLECharacteristic *bleCharacteristics = bleService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+                                                                              BLECharacteristic::PROPERTY_WRITE |
+                                                                              BLECharacteristic::PROPERTY_WRITE_NR |
+                                                                              BLECharacteristic::PROPERTY_NOTIFY);
+
+    bleCharacteristics->setCallbacks(new MyCharacteristicCallbacks());
+    cudDescriptor.setValue(CUD_value, 16);
+    bleCharacteristics->addDescriptor(&cudDescriptor);
+    bleCharacteristics->addDescriptor(new BLE2902());
+
+    bleService->addCharacteristic(bleCharacteristics);
+    
     // Start the service
     bleService->start();
 
     // Start advertising
-    BLEAdvertising *bleAdvertising = BLEDevice::getAdvertising();
+    BLEAdvertising *bleAdvertising = bleServer->getAdvertising();
     bleAdvertising->addServiceUUID(SERVICE_UUID);
     bleAdvertising->setScanResponse(true);
-    bleAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+    bleAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
     bleAdvertising->setMinPreferred(0x12);
-
-
+     bleAdvertising->start();
     BLEDevice::startAdvertising();
     DEBUG_PRINTLN("Waiting a client connection to notify...");
 }

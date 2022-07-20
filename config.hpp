@@ -49,12 +49,12 @@
 // TIMEOUT FOR LAB [STM] response
 #define TIMEOUT 100
 // Buffer size for binary requests [e.g send-command, socket packets, laboratory responses]
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 2048
 
 // RESERVED
 extern SemaphoreHandle_t mutex;
 // DEBUG TOOLS
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)

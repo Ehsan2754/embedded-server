@@ -179,33 +179,11 @@ static unsigned char serverResponse[BUFFER_SIZE];
 
 void serverConnectionHandleRoutine(void *pvParameters)
 {
-  // pinging
-  //  DEBUG_PRINTLN(DEBUG_SERVER "Checking if Server is available.");
-  //  if (!Ping.ping(ServerIP))
-  //  {
-  //    DEBUG_PRINT(DEBUG_SERVER "Server ");
-  //    DEBUG_PRINT(ServerIP);
-  //    DEBUG_PRINTLN(" not available. OFFLINE");
-  //    DEBUG_PRINTLN(DEBUG_SERVER " Waiting for connection ...");
-  //  }
-  //  while (!Ping.ping(ServerIP))
-  //  {
-  //  }
-  //  DEBUG_PRINT(DEBUG_SERVER "Server ");
-  //  DEBUG_PRINT(ServerIP);
-  //  DEBUG_PRINTLN(" Online");
-  // end of pinging
-
   DEBUG_PRINT(DEBUG_SERVER "Connecting Server TCP SOCKET : ");
   DEBUG_PRINT(SERVER_ADDR);
   DEBUG_PRINTLN(SERVER_PORT);
 
   bool established = false;
-
-  // while (!udp.connect(SERVER_ADDR, SERVER_PORT))
-  //   ;
-  // DEBUG_PRINT(DEBUG_SERVER "Connected to server.  ");
-  // DEBUG_PRINTF("IP="SERVER_ADDR" PORT=%d\n",SERVER_PORT)
   for (;;)
   {
     packetSize = 0;
@@ -232,7 +210,6 @@ void serverConnectionHandleRoutine(void *pvParameters)
     }
     vTaskDelay(xServerDelay);
     packetSize = udp.parsePacket();
-    // packetSize = udp.available();
     if (packetSize)
     {
       uint16_t serverReqLen = udp.read(serverPacket, BUFFER_SIZE);
