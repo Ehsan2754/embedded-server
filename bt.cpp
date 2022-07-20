@@ -78,9 +78,11 @@ class MyServerCallbacks : public BLEServerCallbacks
 
 void initBT()
 {
-
+    char devname[10];
+    sprintf(devname,"%s%s",obtainLabtype(),SN);
+    DEBUG_PRINTF(DEBUG_INFO"BT-Beacon->%s\n",devname);
     // Create the BLE Device
-    BLEDevice::init(bleServerName);
+    BLEDevice::init(devname);
 
     // Create the BLE Server
     BLEServer *bleServer = BLEDevice::createServer();
@@ -113,7 +115,7 @@ void initBT()
     bleAdvertising->setMinPreferred(0x12);
     bleAdvertising->start();
     BLEDevice::startAdvertising();
-    DEBUG_PRINTLN("Waiting a client connection to notify...");
+    DEBUG_PRINTLN(DEBUG_INFO"Waiting a client connection to notify...");
 }
 
 void btHandleRoutine(void *pvParameters)

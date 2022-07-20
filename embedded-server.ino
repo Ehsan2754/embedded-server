@@ -65,7 +65,9 @@ void setup()
   LAB_SERIAL.begin(LAB_BAUDRATE);
   LAB_SERIAL.setTimeout(TIMEOUT);
   getSerialNumber();
-
+  
+  
+  
   // Set GPIO 2 as an OUTPUT
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, LOW);

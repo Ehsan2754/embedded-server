@@ -115,6 +115,51 @@ uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
   DEBUG_PRINTF(DEBUG_LAB "CRC-16/MODBUS = 0x%X\n", (uint16_t)(crc << 8 | crc >> 8));
   return crc << 8 | crc >> 8;
 }
+
+char labtypes[5][5] = {
+    "ZLAB",
+    "PHYS",
+    "CHEM",
+    "ECO",
+    "BIO"};
+
+char* obtainLabtype()
+{
+ 
+  char *result_labtype = NULL;
+  DEBUG_PRINTLN(DEBUG_LAB "Obtaining  Lab type.");
+  unsigned char GET_INFO[] = {0xAA, 0x06, 0x00, 0x00, 0xc1, 0xfd};
+  unsigned char RESP_BUFFER[128];
+  auto LenResp = transmitCommand(GET_INFO, 6, RESP_BUFFER, 128);
+  auto expectedLen = 38;
+  if (!LenResp)
+  {
+    DEBUG_PRINTF(DEBUG_LAB "Device is off.\n", LenResp, expectedLen);
+    return 0;
+  }
+
+  if (LenResp != expectedLen)
+  {
+    DEBUG_PRINTF(DEBUG_LAB "ERROR->Invalid Package Length! GOT:%d : EXPECTED %d\n", LenResp, expectedLen);
+  }
+  switch (RESP_BUFFER[10])
+  {
+  default:
+  case 0:
+    result_labtype = labtypes[0];
+    DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
+    break;
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+    result_labtype = labtypes[RESP_BUFFER[10]];
+    DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
+    break;
+  }
+  return result_labtype;
+}
+
 uint16_t obtainSerialNumber()
 {
   DEBUG_PRINTLN(DEBUG_LAB "Obtaining  Serial Number.");

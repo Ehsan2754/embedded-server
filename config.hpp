@@ -95,6 +95,7 @@ extern char SN[SERIAL_NO_LEN];
 // PT
 unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned char *Rx, unsigned int lenRx);
 uint16_t MODBUS_CRC16(const unsigned char *buf, unsigned int len);
+char* obtainLabtype();
 void getSerialNumber();
 void printWifiStatus();
 void serverConnectionHandleRoutine(void *pvParameters);
