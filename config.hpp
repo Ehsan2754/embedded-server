@@ -1,8 +1,7 @@
 #ifndef __CONFIG_HPP__
 #define __CONFIG_HPP__
 
-
-
+#include <HardwareSerial.h>
 // Serial Port For the Lab
 #define LAB_SERIAL Serial2
 #define LAB_BAUDRATE 115200
@@ -12,6 +11,13 @@
 #define SSID_AP_LEN 4
 #define PASSWORD_AP "1234567890"
 #define PASSWORD_AP_LEN 10
+
+//Bluetooth configuration
+#define BT_NAME "zlab" 
+#define BT_NAME_LEN 4
+#define bleServerName "CHEM10817"
+#define SERVICE_UUID "0000ffe0-0000-1000-8000-00805f9b34fb"
+#define CHARACTERISTIC_UUID "0000ffe1-0000-1000-8000-00805f9b34fb" 
 
 // DNS RESOLVE DOMAIN e.g http://DOMAIN.local
 #define DOMAIN "zlab"
@@ -30,7 +36,7 @@
 #define PATH_CONFIG_LEN 7
 
 // WEBSOCKET CYCLE
-#define CYCLE_INTERVAL 10
+#define CYCLE_INTERVAL 200
 // Laboratory [STM] Heartbeat cycle
 #define HEARBEAT_INTERVAL 2500
 
@@ -43,12 +49,12 @@
 // TIMEOUT FOR LAB [STM] response
 #define TIMEOUT 100
 // Buffer size for binary requests [e.g send-command, socket packets, laboratory responses]
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 2048
 
 // RESERVED
 extern SemaphoreHandle_t mutex;
 // DEBUG TOOLS
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
@@ -70,6 +76,9 @@ extern SemaphoreHandle_t mutex;
 // Laboratory Lock [STM Serial Lock]
 extern bool labLock;
 
+
+
+// CORE ENUMERATION
 #define ESP32_CORE_0 0
 #define ESP32_CORE_1 1
 
@@ -86,6 +95,7 @@ extern char SN[SERIAL_NO_LEN];
 // PT
 unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned char *Rx, unsigned int lenRx);
 uint16_t MODBUS_CRC16(const unsigned char *buf, unsigned int len);
+char* obtainLabtype();
 void getSerialNumber();
 void printWifiStatus();
 void serverConnectionHandleRoutine(void *pvParameters);

@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <HardwareSerial.h>
-#include "config.hpp"
 #include <freertos/semphr.h>
+#include "config.hpp"
 SemaphoreHandle_t mutex;
 bool labLock = false;
 const TickType_t xServerDelay = UDP_SERVER_AWAIT / portTICK_PERIOD_MS;
@@ -56,7 +56,7 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
     }
     while (labLock)
     {
-      // DEBUG_PRINT(".");
+      DEBUG_PRINT(".");
     }
     DEBUG_PRINTLN();
     labLock = true;
@@ -100,7 +100,6 @@ unsigned int transmitCommand(unsigned char *Tx, unsigned int lenTx, unsigned cha
   }
   return response_len;
 }
-
 uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
 {
 
@@ -116,6 +115,51 @@ uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
   DEBUG_PRINTF(DEBUG_LAB "CRC-16/MODBUS = 0x%X\n", (uint16_t)(crc << 8 | crc >> 8));
   return crc << 8 | crc >> 8;
 }
+
+char labtypes[5][5] = {
+    "ZLAB",
+    "PHYS",
+    "CHEM",
+    "ECO",
+    "BIO"};
+
+char* obtainLabtype()
+{
+ 
+  char *result_labtype = NULL;
+  DEBUG_PRINTLN(DEBUG_LAB "Obtaining  Lab type.");
+  unsigned char GET_INFO[] = {0xAA, 0x06, 0x00, 0x00, 0xc1, 0xfd};
+  unsigned char RESP_BUFFER[128];
+  auto LenResp = transmitCommand(GET_INFO, 6, RESP_BUFFER, 128);
+  auto expectedLen = 38;
+  if (!LenResp)
+  {
+    DEBUG_PRINTF(DEBUG_LAB "Device is off.\n", LenResp, expectedLen);
+    return 0;
+  }
+
+  if (LenResp != expectedLen)
+  {
+    DEBUG_PRINTF(DEBUG_LAB "ERROR->Invalid Package Length! GOT:%d : EXPECTED %d\n", LenResp, expectedLen);
+  }
+  switch (RESP_BUFFER[10])
+  {
+  default:
+  case 0:
+    result_labtype = labtypes[0];
+    DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
+    break;
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+    result_labtype = labtypes[RESP_BUFFER[10]];
+    DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
+    break;
+  }
+  return result_labtype;
+}
+
 uint16_t obtainSerialNumber()
 {
   DEBUG_PRINTLN(DEBUG_LAB "Obtaining  Serial Number.");
@@ -180,33 +224,11 @@ static unsigned char serverResponse[BUFFER_SIZE];
 
 void serverConnectionHandleRoutine(void *pvParameters)
 {
-  // pinging
-  //  DEBUG_PRINTLN(DEBUG_SERVER "Checking if Server is available.");
-  //  if (!Ping.ping(ServerIP))
-  //  {
-  //    DEBUG_PRINT(DEBUG_SERVER "Server ");
-  //    DEBUG_PRINT(ServerIP);
-  //    DEBUG_PRINTLN(" not available. OFFLINE");
-  //    DEBUG_PRINTLN(DEBUG_SERVER " Waiting for connection ...");
-  //  }
-  //  while (!Ping.ping(ServerIP))
-  //  {
-  //  }
-  //  DEBUG_PRINT(DEBUG_SERVER "Server ");
-  //  DEBUG_PRINT(ServerIP);
-  //  DEBUG_PRINTLN(" Online");
-  // end of pinging
-
   DEBUG_PRINT(DEBUG_SERVER "Connecting Server TCP SOCKET : ");
   DEBUG_PRINT(SERVER_ADDR);
   DEBUG_PRINTLN(SERVER_PORT);
 
   bool established = false;
-
-  // while (!udp.connect(SERVER_ADDR, SERVER_PORT))
-  //   ;
-  // DEBUG_PRINT(DEBUG_SERVER "Connected to server.  ");
-  // DEBUG_PRINTF("IP="SERVER_ADDR" PORT=%d\n",SERVER_PORT)
   for (;;)
   {
     packetSize = 0;
@@ -233,7 +255,6 @@ void serverConnectionHandleRoutine(void *pvParameters)
     }
     vTaskDelay(xServerDelay);
     packetSize = udp.parsePacket();
-    // packetSize = udp.available();
     if (packetSize)
     {
       uint16_t serverReqLen = udp.read(serverPacket, BUFFER_SIZE);

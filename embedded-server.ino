@@ -1,14 +1,17 @@
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <WiFi.h>
 #include <SPIFFS.h>
 #include "fileSystem.hpp"
 #include "webApp.hpp"
+#include "bt.hpp"
 #include "config.hpp"
 
 // Timer variables
-const long interval = 10 * 1000; // interval to wait for Wi-Fi connection (milliseconds)
+const long interval = 10 * 1000;    // interval to wait for Wi-Fi connection (milliseconds)
+const long BLEinterval = 90 * 1000; // interval to wait for BLE connection (milliseconds)
 unsigned long previousMillis = 0;
 TaskHandle_t serverTaskHandle;
+TaskHandle_t btTaskHandle;
 IPAddress localIP;
 IPAddress localGateway;
 IPAddress subnet(255, 255, 0, 0);
@@ -54,6 +57,7 @@ bool initWiFi()
 
 void setup()
 {
+
   mutex = xSemaphoreCreateMutex();
   disableCore0WDT();
   disableCore1WDT();
@@ -62,73 +66,101 @@ void setup()
   LAB_SERIAL.begin(LAB_BAUDRATE);
   LAB_SERIAL.setTimeout(TIMEOUT);
   getSerialNumber();
-  initSPIFFS();
 
   // Set GPIO 2 as an OUTPUT
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, LOW);
 
-  // Load values saved in SPIFFS
-  ssid = readFile(SPIFFS, ssidPath);
-  pass = readFile(SPIFFS, passPath);
-  ip = readFile(SPIFFS, ipPath);
-  gateway = readFile(SPIFFS, gatewayPath);
-  if (ssid != "")
+  // pinMode(PIN_TRIGGER, INPUT);
+  // auto bState = digitalRead(PIN_TRIGGER);
+  // delay(50);
+  // bState += digitalRead(PIN_TRIGGER);
+  initBT();
+  // DEBUG_PRINTLN(DEBUG_INFO "Waiting for BLE clinet...");
+
+  unsigned long currentMillis = millis();
+  previousMillis = currentMillis;
+
+  while (currentMillis - previousMillis <= BLEinterval)
   {
-    DEBUG_PRINTLN(DEBUG_INFO "SSID=");
-    DEBUG_PRINTLN(ssid);
+    currentMillis = millis();
+    if (deviceConnected)
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "BLE MODE ACTIVATED");
+      for (;;)
+      {
+      }
+    }
+    else if ((currentMillis - previousMillis) % 10000 == 0)
+    {
+      DEBUG_PRINTF(DEBUG_INFO "BLE SERVER WAITING FOR %d ms\n", currentMillis - previousMillis);
+    }
   }
-  else
+  DEBUG_PRINTLN(DEBUG_INFO "NO CLIENT ON BLE. Turning off the BT");
+  deinitBT();
+  // if (bState == 0)
+  // {
+
+  // }
+//  else
   {
-    DEBUG_PRINTLN(DEBUG_INFO "No SSID!");
+    initSPIFFS();
+    // Load values saved in SPIFFS
+    ssid = readFile(SPIFFS, ssidPath);
+    pass = readFile(SPIFFS, passPath);
+    ip = readFile(SPIFFS, ipPath);
+    gateway = readFile(SPIFFS, gatewayPath);
+    if (ssid != "")
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "SSID=");
+      DEBUG_PRINTLN(ssid);
+    }
+    else
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "No SSID!");
+    }
+    if (pass != "")
+    {
+      DEBUG_PRINT(DEBUG_INFO "PASSWORD=");
+      DEBUG_PRINTLN(pass);
+    }
+    else
+    {
+      DEBUG_PRINT(DEBUG_INFO "No PASSWORD!");
+    }
+    if (ip != "")
+    {
+      DEBUG_PRINT(DEBUG_INFO "IP=");
+      DEBUG_PRINTLN(ip);
+    }
+    else
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "No IP!");
+    }
+    if (gateway != "")
+    {
+      DEBUG_PRINT(DEBUG_INFO "Gateway=");
+      DEBUG_PRINTLN(gateway);
+    }
+    else
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "No Gateway!");
+    }
+    if (initWiFi())
+    {
+
+      printWifiStatus();
+      xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
+    }
+    else
+    {
+      initWifiAP();
+      initWebAppServer();
+      initWebSocket();
+    }
   }
-  if (pass != "")
-  {
-    DEBUG_PRINT(DEBUG_INFO "PASSWORD=");
-    DEBUG_PRINTLN(pass);
-  }
-  else
-  {
-    DEBUG_PRINT(DEBUG_INFO "No PASSWORD!");
-  }
-  if (ip != "")
-  {
-    DEBUG_PRINT(DEBUG_INFO "IP=");
-    DEBUG_PRINTLN(ip);
-  }
-  else
-  {
-    DEBUG_PRINTLN(DEBUG_INFO "No IP!");
-  }
-  if (gateway != "")
-  {
-    DEBUG_PRINT(DEBUG_INFO "Gateway=");
-    DEBUG_PRINTLN(gateway);
-  }
-  else
-  {
-    DEBUG_PRINTLN(DEBUG_INFO "No Gateway!");
-  }
-  if (initWiFi())
-  {
-    
-    printWifiStatus();
-    // initDNS(false);
-    //initWebAppServer();
-    //66uinitWebSocket();
-    xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
-  }
-  else
-  {
-    initWifiAP();
-    // initDNS(false);
-    initWebAppServer();
-    initWebSocket();
-    //xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
-}
 }
 
 void loop()
 {
-  // dnsServer->processNextRequest();
 }
