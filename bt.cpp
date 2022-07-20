@@ -45,7 +45,7 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
                     {
                         auto startPtr = 20 * i;
                         auto pktLen = (len < (20 * (i + 1))) ? len % 20 : 20;
-                        DEBUG_PRINTF("\t>>Packet sent from byte %d to %d\n", startPtr, startPtr + pktLen);
+                        DEBUG_PRINTF(DEBUG_APP"\t>>Packet sent from byte %d to %d\n", startPtr, startPtr + pktLen);
                         DEBUG_PRINTF("\t\t PTR=[MEM@%d,MEM@%d]\n", bt_res + startPtr, bt_res + startPtr + pktLen);
                         pCharacteristic->setValue(bt_res + startPtr, pktLen);
                         pCharacteristic->notify();
@@ -64,13 +64,13 @@ class MyServerCallbacks : public BLEServerCallbacks
     {
         deviceConnected = true;
         pServer->updateConnParams(param->connect.remote_bda, 0x06, 0x12, 0, 100);
-        DEBUG_PRINTLN("DEVICE CONNECTED!");
+        DEBUG_PRINTLN(DEBUG_APP"DEVICE CONNECTED!");
         DEBUG_PRINTF("\tNUMBER OF CONNECTED DEVICES = %d\n", pServer->getConnectedCount() + 1);
     }
     void onDisconnect(BLEServer *pServer)
     {
         deviceConnected = false;
-        DEBUG_PRINTLN("DEVICE DISCONNECTED!");
+        DEBUG_PRINTLN(DEBUG_APP"DEVICE DISCONNECTED!");
         DEBUG_PRINTF("\tNUMBER OF CONNECTED DEVICES = %d\n", pServer->getConnectedCount() - 1);
         pServer->getAdvertising()->start();
     }
@@ -111,7 +111,7 @@ void initBT()
     bleAdvertising->setScanResponse(true);
     bleAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
     bleAdvertising->setMinPreferred(0x12);
-     bleAdvertising->start();
+    bleAdvertising->start();
     BLEDevice::startAdvertising();
     DEBUG_PRINTLN("Waiting a client connection to notify...");
 }

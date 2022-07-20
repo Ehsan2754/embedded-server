@@ -56,6 +56,7 @@ bool initWiFi()
 
 void setup()
 {
+
   mutex = xSemaphoreCreateMutex();
   disableCore0WDT();
   disableCore1WDT();
@@ -64,72 +65,76 @@ void setup()
   LAB_SERIAL.begin(LAB_BAUDRATE);
   LAB_SERIAL.setTimeout(TIMEOUT);
   getSerialNumber();
-  initSPIFFS();
 
   // Set GPIO 2 as an OUTPUT
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, LOW);
 
-  // Load values saved in SPIFFS
-  ssid = readFile(SPIFFS, ssidPath);
-  pass = readFile(SPIFFS, passPath);
-  ip = readFile(SPIFFS, ipPath);
-  gateway = readFile(SPIFFS, gatewayPath);
-  if (ssid != "")
+  pinMode(PIN_TRIGGER, INPUT);
+  auto bState = digitalRead(PIN_TRIGGER);
+  delay(50);
+  bState += digitalRead(PIN_TRIGGER);
+  if (bState == 0)
   {
-    DEBUG_PRINTLN(DEBUG_INFO "SSID=");
-    DEBUG_PRINTLN(ssid);
+    initBT();
   }
   else
   {
-    DEBUG_PRINTLN(DEBUG_INFO "No SSID!");
-  }
-  if (pass != "")
-  {
-    DEBUG_PRINT(DEBUG_INFO "PASSWORD=");
-    DEBUG_PRINTLN(pass);
-  }
-  else
-  {
-    DEBUG_PRINT(DEBUG_INFO "No PASSWORD!");
-  }
-  if (ip != "")
-  {
-    DEBUG_PRINT(DEBUG_INFO "IP=");
-    DEBUG_PRINTLN(ip);
-  }
-  else
-  {
-    DEBUG_PRINTLN(DEBUG_INFO "No IP!");
-  }
-  if (gateway != "")
-  {
-    DEBUG_PRINT(DEBUG_INFO "Gateway=");
-    DEBUG_PRINTLN(gateway);
-  }
-  else
-  {
-    DEBUG_PRINTLN(DEBUG_INFO "No Gateway!");
-  }
+    initSPIFFS();
+    // Load values saved in SPIFFS
+    ssid = readFile(SPIFFS, ssidPath);
+    pass = readFile(SPIFFS, passPath);
+    ip = readFile(SPIFFS, ipPath);
+    gateway = readFile(SPIFFS, gatewayPath);
+    if (ssid != "")
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "SSID=");
+      DEBUG_PRINTLN(ssid);
+    }
+    else
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "No SSID!");
+    }
+    if (pass != "")
+    {
+      DEBUG_PRINT(DEBUG_INFO "PASSWORD=");
+      DEBUG_PRINTLN(pass);
+    }
+    else
+    {
+      DEBUG_PRINT(DEBUG_INFO "No PASSWORD!");
+    }
+    if (ip != "")
+    {
+      DEBUG_PRINT(DEBUG_INFO "IP=");
+      DEBUG_PRINTLN(ip);
+    }
+    else
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "No IP!");
+    }
+    if (gateway != "")
+    {
+      DEBUG_PRINT(DEBUG_INFO "Gateway=");
+      DEBUG_PRINTLN(gateway);
+    }
+    else
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "No Gateway!");
+    }
+    if (initWiFi())
+    {
 
-
-
-  initBT();
-  
-  if (initWiFi())
-  {
-    
-   printWifiStatus();
-   xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
+      printWifiStatus();
+      xTaskCreatePinnedToCore(serverConnectionHandleRoutine, "serverConnectionHandleRoutine", 4096, NULL, 3, &serverTaskHandle, ESP32_CORE_0);
+    }
+    else
+    {
+      initWifiAP();
+      initWebAppServer();
+      initWebSocket();
+    }
   }
-  else
-  {
-    initWifiAP();
-    initWebAppServer();
-    initWebSocket();
-    
-  }
-
 }
 
 void loop()

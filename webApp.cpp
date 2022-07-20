@@ -52,51 +52,51 @@ public:
   }
 };
 
-void DNSTaskRoutine(void *pvParameters)
-{
-  DEBUG_PRINTLN(DEBUG_INFO "DNS server handling requests.");
-  for (;;)
-  {
-    dnsServer->processNextRequest();
-    //    MDNS.update();
-  }
-}
-void initDNS(bool ap)
-{
-
-  DEBUG_PRINTLN(DEBUG_INFO "Starting DNS");
-  if (ap)
-  {
-    dnsServer = new DNSServer;
-    dnsServer->start(53, "zlab.local/", WiFi.softAPIP());
-    if (!MDNS.begin(DOMAIN))
-    {
-      DEBUG_PRINTLN("Error setting up MDNS responder!");
-    }
-    else
-    {
-      DEBUG_PRINTLN("mDNS responder started URL = http://" DOMAIN ".local/");
-      // Add service to MDNS-SD
-      MDNS.addService("http", "tcp", 80);
-    }
-    xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL, 1, &DNSTaskHandle, ESP32_CORE_0);
-  }
-  else
-  {
-    // dnsServer = new DNSServer;
-    // dnsServer->start(53, "www.zlab.local", WiFi.localIP());
-    if (!MDNS.begin(DOMAIN))
-    {
-      DEBUG_PRINTLN("Error setting up MDNS responder!");
-    }
-    else
-    {
-      DEBUG_PRINTLN("mDNS responder started URL = http://" DOMAIN ".local/");
-      // Add service to MDNS-SD
-      MDNS.addService("http", "tcp", 80);
-    }
-  }
-}
+//void DNSTaskRoutine(void *pvParameters)
+//{
+//  DEBUG_PRINTLN(DEBUG_INFO "DNS server handling requests.");
+//  for (;;)
+//  {
+//    dnsServer->processNextRequest();
+//    //    MDNS.update();
+//  }
+//}
+//void initDNS(bool ap)
+//{
+//
+//  DEBUG_PRINTLN(DEBUG_INFO "Starting DNS");
+//  if (ap)
+//  {
+////    dnsServer = new DNSServer();
+//    dnsServer->start(53, "zlab.local/", WiFi.softAPIP());
+//    if (!MDNS.begin(DOMAIN))
+//    {
+//      DEBUG_PRINTLN("Error setting up MDNS responder!");
+//    }
+//    else
+//    {
+//      DEBUG_PRINTLN("mDNS responder started URL = http://" DOMAIN ".local/");
+//      // Add service to MDNS-SD
+//      MDNS.addService("http", "tcp", 80);
+//    }
+//    xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL, 1, &DNSTaskHandle, ESP32_CORE_0);
+//  }
+//  else
+//  {
+//    // dnsServer = new DNSServer;
+//    // dnsServer->start(53, "www.zlab.local", WiFi.localIP());
+//    if (!MDNS.begin(DOMAIN))
+//    {
+//      DEBUG_PRINTLN("Error setting up MDNS responder!");
+//    }
+//    else
+//    {
+//      DEBUG_PRINTLN("mDNS responder started URL = http://" DOMAIN ".local/");
+//      // Add service to MDNS-SD
+//      MDNS.addService("http", "tcp", 80);
+//    }
+//  }
+//}
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
   // DEBUG_PRINTLN("Сommand sent to socket.->")

@@ -36,7 +36,7 @@
 #define PATH_CONFIG_LEN 7
 
 // WEBSOCKET CYCLE
-#define CYCLE_INTERVAL 10
+#define CYCLE_INTERVAL 200
 // Laboratory [STM] Heartbeat cycle
 #define HEARBEAT_INTERVAL 2500
 
@@ -54,7 +54,7 @@
 // RESERVED
 extern SemaphoreHandle_t mutex;
 // DEBUG TOOLS
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
 #define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
