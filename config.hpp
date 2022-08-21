@@ -24,7 +24,8 @@
 #define DOMAIN_LEN 4
 
 // PIN Configuration
-#define PIN_LED 2     // On board LED [server establishment indicator]
+#define PIN_LED 19     // On board LED [server establishment indicator]
+#define PIN_TRIGGER 18 // PIN which will choose the device mode
 
 // WebApp and server endpoints
 #define PATH_SENDCOMMAND "/api/lab/send-command"
@@ -88,7 +89,7 @@ extern char SN[SERIAL_NO_LEN];
 #define USERNAME "admin"
 #define PASSWORD SN
 // PIN Configuration
-#define PIN_TRIGGER 0 // BOOT PIN which will reset the ssid
+
 // Labortory[STM] Serial Pins
 #define RXD2 16
 #define TXD2 17

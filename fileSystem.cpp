@@ -6,6 +6,7 @@ const char *ssidPath = PATH_CONFIG "/ssid.txt";
 const char *passPath = PATH_CONFIG "/pass.txt";
 const char *ipPath = PATH_CONFIG "/ip.txt";
 const char *gatewayPath = PATH_CONFIG "/gateway.txt";
+const char *serverPath = PATH_CONFIG "/server.txt";
 
 // Initialize SPIFFS
 void initSPIFFS()

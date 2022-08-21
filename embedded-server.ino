@@ -67,43 +67,67 @@ void setup()
   LAB_SERIAL.setTimeout(TIMEOUT);
   getSerialNumber();
 
-  // Set GPIO 2 as an OUTPUT
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, LOW);
 
-  // pinMode(PIN_TRIGGER, INPUT);
-  // auto bState = digitalRead(PIN_TRIGGER);
-  // delay(50);
-  // bState += digitalRead(PIN_TRIGGER);
-  initBT();
+  pinMode(PIN_TRIGGER, INPUT);
+
+  auto bState = digitalRead(PIN_TRIGGER);
+  delay(50);
+  bState += digitalRead(PIN_TRIGGER);
+  if (bState == 2)
+  {
+    digitalWrite(PIN_LED, LOW);
+    delay(100);
+    digitalWrite(PIN_LED, HIGH);
+    delay(100);
+    digitalWrite(PIN_LED, LOW);
+    delay(100);
+    digitalWrite(PIN_LED, HIGH);
+    delay(100);
+    digitalWrite(PIN_LED, LOW);
+    
+    initBT();
+  }
   // DEBUG_PRINTLN(DEBUG_INFO "Waiting for BLE clinet...");
 
-  unsigned long currentMillis = millis();
-  previousMillis = currentMillis;
+  // unsigned long currentMillis = millis();
+  // previousMillis = currentMillis;
 
-  while (currentMillis - previousMillis <= BLEinterval)
-  {
-    currentMillis = millis();
-    if (deviceConnected)
-    {
-      DEBUG_PRINTLN(DEBUG_INFO "BLE MODE ACTIVATED");
-      for (;;)
-      {
-      }
-    }
-    else if ((currentMillis - previousMillis) % 10000 == 0)
-    {
-      DEBUG_PRINTF(DEBUG_INFO "BLE SERVER WAITING FOR %d ms\n", currentMillis - previousMillis);
-    }
-  }
-  DEBUG_PRINTLN(DEBUG_INFO "NO CLIENT ON BLE. Turning off the BT");
-  deinitBT();
+  // while (currentMillis - previousMillis <= BLEinterval)
+  // {
+  // currentMillis = millis();
+  // if (deviceConnected)
+  // {
+  // DEBUG_PRINTLN(DEBUG_INFO "BLE MODE ACTIVATED");
+  // for (;;)
+  // {
+  // }
+  // }
+  // else if ((currentMillis - previousMillis) % 10000 == 0)
+  // {
+  // DEBUG_PRINTF(DEBUG_INFO "BLE SERVER WAITING FOR %d ms\n", currentMillis - previousMillis);
+  // }
+  // }
+  // DEBUG_PRINTLN(DEBUG_INFO "NO CLIENT ON BLE. Turning off the BT");
+  // deinitBT();
   // if (bState == 0)
   // {
 
   // }
-//  else
+  else
   {
+    digitalWrite(PIN_LED, LOW);
+    delay(100);
+    digitalWrite(PIN_LED, HIGH);
+    delay(100);
+    digitalWrite(PIN_LED, LOW);
+    delay(100);
+    digitalWrite(PIN_LED, HIGH);
+    delay(100);
+    digitalWrite(PIN_LED, LOW);
+    delay(100);
+    digitalWrite(PIN_LED, HIGH);
     initSPIFFS();
     // Load values saved in SPIFFS
     ssid = readFile(SPIFFS, ssidPath);
