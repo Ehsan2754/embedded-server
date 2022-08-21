@@ -134,6 +134,7 @@ void setup()
     pass = readFile(SPIFFS, passPath);
     ip = readFile(SPIFFS, ipPath);
     gateway = readFile(SPIFFS, gatewayPath);
+    serverURL = readFile(SPIFFS,serverPath);
     if (ssid != "")
     {
       DEBUG_PRINTLN(DEBUG_INFO "SSID=");
@@ -169,6 +170,15 @@ void setup()
     else
     {
       DEBUG_PRINTLN(DEBUG_INFO "No Gateway!");
+    }
+    if (serverURL != "")
+    {
+      DEBUG_PRINT(DEBUG_INFO "serverURL=");
+      DEBUG_PRINTLN(serverURL);
+    }
+    else
+    {
+      DEBUG_PRINTLN(DEBUG_INFO "No Server URL!");
     }
     if (initWiFi())
     {

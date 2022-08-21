@@ -6,7 +6,7 @@ extern const char *ssidPath;
 extern const char *passPath;
 extern const char *ipPath;
 extern const char *gatewayPath;
-
+extern const char *serverPath;
 // Initialize SPIFFS
 void initSPIFFS();
 // Read File from SPIFFS

@@ -6,7 +6,7 @@ extern String ssid;
 extern String pass;
 extern String ip;
 extern String gateway;
-
+extern String serverURL;
 // Search for parameter in HTTP POST request
 extern const char *PARAM_INPUT_1;
 extern const char *PARAM_INPUT_2;

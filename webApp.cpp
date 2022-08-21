@@ -14,10 +14,12 @@ String ssid;
 String pass;
 String ip;
 String gateway;
+String serverURL;
 const char *PARAM_INPUT_1 = "ssid";
 const char *PARAM_INPUT_2 = "pass";
 const char *PARAM_INPUT_3 = "ip";
 const char *PARAM_INPUT_4 = "gateway";
+const char *PARAM_INPUT_5 = "server";
 
 bool subscribeFlag = false;
 TaskHandle_t socketTaskHandle = NULL;
@@ -229,7 +231,14 @@ void initWebAppServer()
             // Write file to save value
             writeFile(SPIFFS, gatewayPath, gateway.c_str());
           }
-          
+          // HTTP POST serverURL value
+          if (p->name() == PARAM_INPUT_5) {
+            serverURL = p->value().c_str();
+            DEBUG_PRINT(DEBUG_APP"Server set to: ");
+            DEBUG_PRINTLN(serverURL);
+            // Write file to save value
+            writeFile(SPIFFS, serverPath, serverURL.c_str());
+          }
           DEBUG_PRINTF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
