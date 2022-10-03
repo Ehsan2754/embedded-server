@@ -54,58 +54,9 @@ public:
   }
 };
 
-//void DNSTaskRoutine(void *pvParameters)
-//{
-//  DEBUG_PRINTLN(DEBUG_INFO "DNS server handling requests.");
-//  for (;;)
-//  {
-//    dnsServer->processNextRequest();
-//    //    MDNS.update();
-//  }
-//}
-//void initDNS(bool ap)
-//{
-//
-//  DEBUG_PRINTLN(DEBUG_INFO "Starting DNS");
-//  if (ap)
-//  {
-////    dnsServer = new DNSServer();
-//    dnsServer->start(53, "zlab.local/", WiFi.softAPIP());
-//    if (!MDNS.begin(DOMAIN))
-//    {
-//      DEBUG_PRINTLN("Error setting up MDNS responder!");
-//    }
-//    else
-//    {
-//      DEBUG_PRINTLN("mDNS responder started URL = http://" DOMAIN ".local/");
-//      // Add service to MDNS-SD
-//      MDNS.addService("http", "tcp", 80);
-//    }
-//    xTaskCreatePinnedToCore(DNSTaskRoutine, "DNSTaskRoutine", 2048, NULL, 1, &DNSTaskHandle, ESP32_CORE_0);
-//  }
-//  else
-//  {
-//    // dnsServer = new DNSServer;
-//    // dnsServer->start(53, "www.zlab.local", WiFi.localIP());
-//    if (!MDNS.begin(DOMAIN))
-//    {
-//      DEBUG_PRINTLN("Error setting up MDNS responder!");
-//    }
-//    else
-//    {
-//      DEBUG_PRINTLN("mDNS responder started URL = http://" DOMAIN ".local/");
-//      // Add service to MDNS-SD
-//      MDNS.addService("http", "tcp", 80);
-//    }
-//  }
-//}
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
-  // DEBUG_PRINTLN("Сommand sent to socket.->")
-  // unsigned char response_buffer[BUFFER_SIZE];
-  // unsigned int response_len = transmitCommand(data, len, response_buffer, BUFFER_SIZE);
-  // ws->binaryAll(response_buffer, response_len);
-  // DEBUG_PRINTLN("<-Сommand replied.")
+
 }
 unsigned char sensorResponse[BUFFER_SIZE];
 void socketTaskRoutine(void *pvParameters)
@@ -164,22 +115,14 @@ void initWebSocket()
 {
 
   DEBUG_PRINTLN(DEBUG_APP "WebSocket Initialized.");
-  // sprintf(socket_subscribe_str, "%s%s", PATH_SUBSCRIBE, SN);
-  // ws.url = socket_subscribe_str;
-  //  ws = new AsyncWebSocket(PATH_SUBSCRIBE);
   ws->onEvent(onEvent);
   server.addHandler(ws);
   subscribeFlag = true;
   xTaskCreatePinnedToCore(socketTaskRoutine, "socketTaskRoutine", 2048, NULL, 2, &socketTaskHandle, ESP32_CORE_1);
 }
 
-// static char path_sendcommand_str[PATH_SENDCOMMAND_LEN + SERIAL_NO_LEN];
-// static char path_subscribe_str[PATH_SUBSCRIBE_LEN + SERIAL_NO_LEN];
 void initWebAppServer()
 {
-//  server.serveStatic(PATH_CONFIG "/", SPIFFS, PATH_CONFIG "/")
-//      .setDefaultFile("/admin.html");
-
   server.serveStatic("/", SPIFFS, "/");
 
   // Route for root / web page

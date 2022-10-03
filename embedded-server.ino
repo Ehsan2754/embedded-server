@@ -1,4 +1,3 @@
-//#include <Arduino.h>
 #include <WiFi.h>
 #include <SPIFFS.h>
 #include "fileSystem.hpp"
@@ -89,32 +88,6 @@ void setup()
     
     initBT();
   }
-  // DEBUG_PRINTLN(DEBUG_INFO "Waiting for BLE clinet...");
-
-  // unsigned long currentMillis = millis();
-  // previousMillis = currentMillis;
-
-  // while (currentMillis - previousMillis <= BLEinterval)
-  // {
-  // currentMillis = millis();
-  // if (deviceConnected)
-  // {
-  // DEBUG_PRINTLN(DEBUG_INFO "BLE MODE ACTIVATED");
-  // for (;;)
-  // {
-  // }
-  // }
-  // else if ((currentMillis - previousMillis) % 10000 == 0)
-  // {
-  // DEBUG_PRINTF(DEBUG_INFO "BLE SERVER WAITING FOR %d ms\n", currentMillis - previousMillis);
-  // }
-  // }
-  // DEBUG_PRINTLN(DEBUG_INFO "NO CLIENT ON BLE. Turning off the BT");
-  // deinitBT();
-  // if (bState == 0)
-  // {
-
-  // }
   else
   {
     digitalWrite(PIN_LED, LOW);
