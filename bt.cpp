@@ -14,12 +14,6 @@ uint8_t CUD_value[17] = "Characteristic 6";
 static uint8_t bt_req[BUFFER_SIZE];
 static uint8_t bt_res[BUFFER_SIZE];
 
-// Characteristic and Descriptor
-// BLEServer *bleServer = NULL;
-// BLEService *bleService = NULL;
-// BLECharacteristic *bleCharacteristics = NULL;
-// BLEAdvertising *bleAdvertising = NULL;
-
 BLEDescriptor cudDescriptor(BLEUUID((uint16_t)0x2901));
 
 // Setup callbacks onWrite
@@ -123,15 +117,5 @@ void initBT()
 
 void btHandleRoutine(void *pvParameters)
 {
-    for (;;)
-    {
-        // if(SerialBT.available()){
-        //     DEBUG_PRINTLN(DEBUG_INFO "Request from BT");
-        //     uint16_t req_len = SerialBT.readBytes(bt_req,BUFFER_SIZE);
-        //     uint16_t res_len = transmitCommand(bt_req,req_len,bt_res,BUFFER_SIZE);
-        //     for(uint16_t i=0;i<res_len;i++){
-        //      SerialBT.write(bt_res[i]);
-        //     }
-        // }
-    }
+
 }

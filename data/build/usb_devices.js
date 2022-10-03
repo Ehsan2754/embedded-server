@@ -305,7 +305,8 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0x0483,
             productId: 0x5740,
-            ico: 'sensors/Oscill.png'
+            ico: 'Oscill.png'
+
         }
     ],
     [
@@ -318,7 +319,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             modes: [
                 new SensorMode({ minValue: 0, maxValue: 2, unit: 'D', accuracy: 2 }),
             ],
-            ico: 'sensors/Colorimeter.png',
+            ico: 'Colorimeter.png',
         },
     ],
     [
@@ -359,7 +360,8 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0xC0DE,
             productId: 0xDB65,
-            ico: 'sensors/OpticalDensitySensor.png',
+            ico: 'OpticalDensitySensor.png',
+
         },
     ],
     [
@@ -377,7 +379,8 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0xC0DE,
             productId: 0xDB66,
-            ico: 'sensors/SoilMoistureSensor.png',
+            ico: 'SoilMoistureSensor.png',
+
         },
     ],
     [
@@ -395,7 +398,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0xC0DE,
             productId: 0xDB67,
-            ico: 'sensors/SoundSensor.png',
+            ico: 'SoundSensor.png',
         },
     ],
     [
@@ -413,7 +416,8 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0xC0DE,
             productId: 0xDB68,
-            ico: 'sensors/CoSensor.png',
+
+            ico: 'CoSensor.png',
         },
     ],
     [
@@ -431,7 +435,8 @@ const USB_SENSORS_PREFERENCES = new Map([
                 }),
             ],
             productId: 0xDB69,
-            ico: 'sensors/Illumination.png',
+            ico: 'Illumination.png',
+
         },
     ],
     [
@@ -449,7 +454,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0xC0DE,
             productId: 0xDB6A,
-            ico: 'sensors/Cardio.png',
+            ico: 'Cardio.png',
         },
     ],
     [
@@ -467,7 +472,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0xC0DE,
             productId: 0xDB6B,
-            ico: 'sensors/WristSensor.png',
+            ico: 'WristSensor.png',
         },
     ]
 ]);

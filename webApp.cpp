@@ -115,22 +115,14 @@ void initWebSocket()
 {
 
   DEBUG_PRINTLN(DEBUG_APP "WebSocket Initialized.");
-  // sprintf(socket_subscribe_str, "%s%s", PATH_SUBSCRIBE, SN);
-  // ws.url = socket_subscribe_str;
-  //  ws = new AsyncWebSocket(PATH_SUBSCRIBE);
   ws->onEvent(onEvent);
   server.addHandler(ws);
   subscribeFlag = true;
   xTaskCreatePinnedToCore(socketTaskRoutine, "socketTaskRoutine", 2048, NULL, 2, &socketTaskHandle, ESP32_CORE_1);
 }
 
-// static char path_sendcommand_str[PATH_SENDCOMMAND_LEN + SERIAL_NO_LEN];
-// static char path_subscribe_str[PATH_SUBSCRIBE_LEN + SERIAL_NO_LEN];
 void initWebAppServer()
 {
-//  server.serveStatic(PATH_CONFIG "/", SPIFFS, PATH_CONFIG "/")
-//      .setDefaultFile("/admin.html");
-
   server.serveStatic("/", SPIFFS, "/");
 
   // Route for root / web page
