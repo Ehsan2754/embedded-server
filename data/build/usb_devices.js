@@ -306,6 +306,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             vendorId: 0x0483,
             productId: 0x5740,
             ico: 'Oscill.png'
+
         }
     ],
     [
@@ -360,6 +361,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             vendorId: 0xC0DE,
             productId: 0xDB65,
             ico: 'OpticalDensitySensor.png',
+
         },
     ],
     [
@@ -378,6 +380,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             vendorId: 0xC0DE,
             productId: 0xDB66,
             ico: 'SoilMoistureSensor.png',
+
         },
     ],
     [
@@ -413,6 +416,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             vendorId: 0xC0DE,
             productId: 0xDB68,
+
             ico: 'CoSensor.png',
         },
     ],
@@ -432,6 +436,7 @@ const USB_SENSORS_PREFERENCES = new Map([
             ],
             productId: 0xDB69,
             ico: 'Illumination.png',
+
         },
     ],
     [
