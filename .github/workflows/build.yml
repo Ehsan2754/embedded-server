@@ -25,8 +25,8 @@ jobs:
         run: |
           sudo apt install unzip
           sudo unzip './lib/*.zip'  -d ./tmp
-          sudo find ./ext -name '*.cpp' -exec cp {} ./ \;find ./ext -name '*.hpp' -exec cp {} ./ \;
-          sudo find ./ext -name '*.c' -exec cp {} ./ \;find ./ext -name '*.h' -exec cp {} ./ \;
+          sudo find ./tmp -name '*.cpp' -exec cp {} ./ \;find ./tmp -name '*.hpp' -exec cp {} ./ \;
+          sudo find ./tmp -name '*.c' -exec cp {} ./ \;find ./tmp -name '*.h' -exec cp {} ./ \;
           sudo rm -r ./tmp 
           
           
