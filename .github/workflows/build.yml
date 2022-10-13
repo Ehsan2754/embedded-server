@@ -26,4 +26,4 @@ jobs:
 #           cp ./example/secrets.cpp ./esp8266_sketch/secrets.cpp
       - name: Compile Sketch
         run: |
-          arduino-cli compile --fqbn esp32:esp32:generic ./
+          arduino-cli compile --fqbn esp32:esp32:nodemcu-32s ./
