@@ -21,9 +21,15 @@ jobs:
           arduino-cli core update-index
           arduino-cli core search esp32
           arduino-cli core install esp32:esp32
-#       - name: Copy example of secrets.cpp
-#         run: |
-#           cp ./example/secrets.cpp ./esp8266_sketch/secrets.cpp
+      - name : Install library depencencies
+        run: |
+          sudo apt install unzip
+          sudo unzip './lib/*.zip'  -d ./tmp
+          sudo find ./ext -name '*.cpp' -exec cp {} ./ \;find ./ext -name '*.hpp' -exec cp {} ./ \;
+          sudo find ./ext -name '*.c' -exec cp {} ./ \;find ./ext -name '*.h' -exec cp {} ./ \;
+          sudo rm -r ./tmp 
+          
+          
       - name: Compile Sketch
         run: |
           arduino-cli compile --fqbn esp32:esp32:nodemcu-32s ./
