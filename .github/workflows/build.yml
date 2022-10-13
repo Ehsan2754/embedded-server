@@ -25,6 +25,7 @@ jobs:
         run: |
           echo "library:" >>  /home/runner/.arduino15/arduino-cli.yaml
           echo "  enable_unsafe_install: true" >>  /home/runner/.arduino15/arduino-cli.yaml
+          cat /home/runner/.arduino15/arduino-cli.yaml
           for LIB in ./lib/*.zip; do echo $LIB; arduino-cli lib install --zip-path $LIB ;  done
       - name: Compile Sketch
         run: |
