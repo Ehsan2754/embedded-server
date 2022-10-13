@@ -12,6 +12,7 @@ extern const char *PARAM_INPUT_1;
 extern const char *PARAM_INPUT_2;
 extern const char *PARAM_INPUT_3;
 extern const char *PARAM_INPUT_4;
+extern const char *PARAM_INPUT_5;
 void initDNS(bool ap);
 void initWebSocket();
 void initWebAppServer();
