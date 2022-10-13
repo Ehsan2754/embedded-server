@@ -1,0 +1,29 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+
+      - name: Install platform
+        run: |
+          arduino-cli config init
+          echo "board_manager:" >  /home/runner/.arduino15/arduino-cli.yaml
+          echo "  additional_urls:" >>  /home/runner/.arduino15/arduino-cli.yaml
+          echo "    [https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json]" >>  /home/runner/.arduino15/arduino-cli.yaml
+          arduino-cli core update-index
+          arduino-cli core search esp32
+          arduino-cli core install esp32:esp32
+#       - name: Copy example of secrets.cpp
+#         run: |
+#           cp ./example/secrets.cpp ./esp8266_sketch/secrets.cpp
+      - name: Compile Sketch
+        run: |
+          arduino-cli compile --fqbn esp32:esp32:generic ./
