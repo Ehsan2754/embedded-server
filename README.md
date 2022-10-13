@@ -1,3 +1,4 @@
+![build](https://github.com/ehsan2754/embedded-server/actions/workflows/build.yml/badge.svg)
 ## Установка
 
 Установи arduino IDE [https://www.arduino.cc/en/software](https://www.arduino.cc/en/software)
