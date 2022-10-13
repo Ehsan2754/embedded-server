@@ -25,10 +25,10 @@ jobs:
         run: |
           sudo apt install unzip
           sudo unzip './lib/*.zip'  -d ./tmp
-          sudo find ./tmp -name '*.cpp' -exec cp --verbose {} ./ \;
-          sudo find ./tmp -name '*.hpp' -exec cp --verbose {} ./ \;
-          sudo find ./tmp -name '*.c' -exec cp --verbose {} ./ \;
-          sudo find ./tmp -name '*.h' -exec cp --verbose {} ./ \;
+          sudo find ./tmp -name '*.cpp' -exec cp --verbose {} ./src \;
+          sudo find ./tmp -name '*.hpp' -exec cp --verbose {} ./src \;
+          sudo find ./tmp -name '*.c' -exec cp --verbose {} ./src \;
+          sudo find ./tmp -name '*.h' -exec cp --verbose {} ./src \;
           sudo rm -r ./tmp 
           
           
