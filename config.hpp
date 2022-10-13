@@ -42,7 +42,7 @@
 #define HEARBEAT_INTERVAL 2500
 
 // UDP server Specifications
-#define UDP_SERVER_IP "62.113.104.145"
+#define UDP_SERVER_IP "45.147.179.96"
 #define UDP_SERVER_IP_LEN 14
 #define UDP_SERVER_PORT 5001
 #define UDP_SERVER_AWAIT 1
