@@ -3,6 +3,7 @@
 #include <WiFiUdp.h>
 #include <HardwareSerial.h>
 #include <freertos/semphr.h>
+#include "webApp.hpp"
 #include "config.hpp"
 SemaphoreHandle_t mutex;
 bool labLock = false;
@@ -225,7 +226,7 @@ static unsigned char serverResponse[BUFFER_SIZE];
 void serverConnectionHandleRoutine(void *pvParameters)
 {
   DEBUG_PRINT(DEBUG_SERVER "Connecting Server TCP SOCKET : ");
-  DEBUG_PRINT(SERVER_ADDR);
+  DEBUG_PRINT(serverURL.c_str());
   DEBUG_PRINTLN(SERVER_PORT);
 
   bool established = false;
@@ -236,7 +237,7 @@ void serverConnectionHandleRoutine(void *pvParameters)
     if (!established)
     {
       DEBUG_PRINTLN(DEBUG_SERVER "Establishing connection");
-      udp.beginPacket(SERVER_ADDR, SERVER_PORT);
+      udp.beginPacket(serverURL.c_str(), SERVER_PORT);
       unsigned char serialPKT[11];
       serialPKT[0] = '$';
       for (auto i = 0; i < SERIAL_NO_LEN; i++)
