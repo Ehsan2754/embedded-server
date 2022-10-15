@@ -16,9 +16,13 @@
 
 ![](img/esp32_board_install.png)
 
-Положи содержимое архива в репе C:\embedded-server\lib\ESPAsyncWebServer.zip в папку библиотек ардумны C:\Program Files (x86)\Arduino\libraries folder 
+Положи содержимое архива в репе C:\embedded-server\lib\ESPAsyncWebServer.zip в папку библиотек ардуины C:\Program Files (x86)\Arduino\libraries 
 
 ![](img/libraries_folder.jpg)
+
+Положи содержимое архива в репе C:\embedded-server\lib\AsyncTCP.zip в папку библиотек ардуины C:\Program Files (x86)\Arduino\libraries 
+
+![image](https://user-images.githubusercontent.com/38163258/195976800-7143b370-46ef-4a3b-b2d7-31e296e1cf78.png)
 
 Положи содежимое архива ESP32FS-1.0.zip в папку C:\Program Files (x86)\Arduino\tools
 
@@ -29,6 +33,7 @@
 ## Прошивка
 
 Инструменты -> Платы:.. -> ESP32 Arduino -> ESP32 Dev Module
+
 ![](img/data_upload.png)
 
 <!-- ![](img/board_choose.jpg) -->
@@ -36,9 +41,9 @@
 
 ![](img/check.png)
 
-выбрать правильный ком порт
+Сделать такие же настройки как на картинке и выбрать правильный ком порт
 
-![](img/com.png)
+![image](https://user-images.githubusercontent.com/38163258/195976688-39731db0-3850-45ef-91b1-b9d9ee0130c5.png)
 
 нажать кнопку со стрелкой
 
