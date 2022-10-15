@@ -16,15 +16,15 @@
 
 ![](img/esp32_board_install.png)
 
-Положи содержимое архива в репе C:\embedded-server\lib\ESPAsyncWebServer.zip в папку библиотек ардуины C:\Program Files (x86)\Arduino\libraries 
+Положи содержимое архива в репе embedded-server\lib\ESPAsyncWebServer.zip в папку библиотек ардуины C:\Program Files (x86)\Arduino\libraries 
 
 ![](img/libraries_folder.jpg)
 
-Положи содержимое архива в репе C:\embedded-server\lib\AsyncTCP.zip в папку библиотек ардуины C:\Program Files (x86)\Arduino\libraries 
+Положи содержимое архива в репе embedded-server\lib\AsyncTCP.zip в папку библиотек ардуины C:\Program Files (x86)\Arduino\libraries 
 
 ![image](https://user-images.githubusercontent.com/38163258/195976800-7143b370-46ef-4a3b-b2d7-31e296e1cf78.png)
 
-Положи содежимое архива ESP32FS-1.0.zip в папку C:\Program Files (x86)\Arduino\tools
+Положи содежимое архива embedded-server\tools\ESP32FS-1.0.zip в папку C:\Program Files (x86)\Arduino\tools
 
 ![](img/tools_folder.jpg)
 
