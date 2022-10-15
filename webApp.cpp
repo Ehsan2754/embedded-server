@@ -186,8 +186,9 @@ void initWebAppServer()
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + ip);
-      delay(30000);
-      ESP.restart(); });
+      setup();
+      
+      });
   server.on(
       PATH_SENDCOMMAND,
       HTTP_POST,

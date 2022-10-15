@@ -14,7 +14,7 @@ TaskHandle_t btTaskHandle;
 IPAddress localIP;
 IPAddress localGateway;
 IPAddress subnet(255, 255, 0, 0);
-
+auto bState = 0;
 // Initialize WiFi
 bool initWiFi()
 {
@@ -71,7 +71,7 @@ void setup()
 
   pinMode(PIN_TRIGGER, INPUT);
 
-  auto bState = digitalRead(PIN_TRIGGER);
+  bState += digitalRead(PIN_TRIGGER);
   delay(50);
   bState += digitalRead(PIN_TRIGGER);
   if (bState == 2)
