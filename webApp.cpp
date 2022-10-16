@@ -186,7 +186,12 @@ void initWebAppServer()
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + ip);
+
+
+      // -- This is freaking insane. no sense to do this but ... 
       setup();
+      // end of madness
+      
       
       });
   server.on(
