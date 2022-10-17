@@ -183,11 +183,11 @@ void loop()
             }
             else
             {
-            writeFile(SPIFFS, ssidPath, "");
-            writeFile(SPIFFS, passPath, "");
-            writeFile(SPIFFS, ipPath, "");
-            writeFile(SPIFFS, gatewayPath, "");
-            writeFile(SPIFFS, serverPath, "");
+            writeFile(SPIFFS, ssidPath, "github.com/ehsan2754");
+            writeFile(SPIFFS, passPath, "github.com/ehsan2754");
+            writeFile(SPIFFS, ipPath, " ");
+            writeFile(SPIFFS, gatewayPath, " ");
+            writeFile(SPIFFS, serverPath, "8.8.8.8");
             DEBUG_PRINTLN("Device Configuration Factory Reset");
             }
             digitalWrite(PIN_LED, LOW);
