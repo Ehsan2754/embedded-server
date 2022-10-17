@@ -177,19 +177,17 @@ void loop()
         if ((!digitalRead(PIN_TRIGGER)) || reset_params)
         {
             DEBUG_PRINTLN("Triggered");
-            if(reset_params)
+            if (reset_params)
             {
-            reset_params = false;
+                reset_params = false;
+                writeFile(SPIFFS, ssidPath, "github.com/ehsan2754");
+                writeFile(SPIFFS, passPath, "github.com/ehsan2754");
+                writeFile(SPIFFS, ipPath, " ");
+                writeFile(SPIFFS, gatewayPath, " ");
+                writeFile(SPIFFS, serverPath, "8.8.8.8");
+                DEBUG_PRINTLN("Device Configuration Factory Reset");
             }
-            else
-            {
-            writeFile(SPIFFS, ssidPath, "github.com/ehsan2754");
-            writeFile(SPIFFS, passPath, "github.com/ehsan2754");
-            writeFile(SPIFFS, ipPath, " ");
-            writeFile(SPIFFS, gatewayPath, " ");
-            writeFile(SPIFFS, serverPath, "8.8.8.8");
-            DEBUG_PRINTLN("Device Configuration Factory Reset");
-            }
+
             digitalWrite(PIN_LED, LOW);
             delay(100);
             digitalWrite(PIN_LED, HIGH);
