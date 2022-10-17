@@ -20,7 +20,7 @@ const char *PARAM_INPUT_2 = "pass";
 const char *PARAM_INPUT_3 = "ip";
 const char *PARAM_INPUT_4 = "gateway";
 const char *PARAM_INPUT_5 = "server";
-
+bool reset_params = false;
 bool subscribeFlag = false;
 TaskHandle_t socketTaskHandle = NULL;
 TaskHandle_t DNSTaskHandle = NULL;
@@ -189,7 +189,7 @@ void initWebAppServer()
 
 
       // -- This is freaking insane. no sense to do this but ... 
-      setup();
+      reset_params = true;
       // end of madness
       
       

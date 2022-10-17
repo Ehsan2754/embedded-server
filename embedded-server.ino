@@ -171,20 +171,25 @@ void setup()
 const TickType_t xDelay = 5000 / portTICK_PERIOD_MS;
 void loop()
 {
-    if (!digitalRead(PIN_TRIGGER))
+    if ((!digitalRead(PIN_TRIGGER)) || reset_params)
     {
         vTaskDelay(xDelay);
-        if (!digitalRead(PIN_TRIGGER))
+        if ((!digitalRead(PIN_TRIGGER)) || reset_params)
         {
-            
             DEBUG_PRINTLN("Triggered");
+            if(reset_params)
+            {
+            reset_params = false;
+            }
+            else
+            {
             writeFile(SPIFFS, ssidPath, "");
             writeFile(SPIFFS, passPath, "");
             writeFile(SPIFFS, ipPath, "");
             writeFile(SPIFFS, gatewayPath, "");
             writeFile(SPIFFS, serverPath, "");
             DEBUG_PRINTLN("Device Configuration Factory Reset");
-
+            }
             digitalWrite(PIN_LED, LOW);
             delay(100);
             digitalWrite(PIN_LED, HIGH);
