@@ -180,6 +180,10 @@ void loop()
             if (reset_params)
             {
                 reset_params = false;
+                
+            }
+            else
+            {
                 writeFile(SPIFFS, ssidPath, "github.com/ehsan2754");
                 writeFile(SPIFFS, passPath, "github.com/ehsan2754");
                 writeFile(SPIFFS, ipPath, " ");
