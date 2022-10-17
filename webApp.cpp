@@ -20,7 +20,7 @@ const char *PARAM_INPUT_2 = "pass";
 const char *PARAM_INPUT_3 = "ip";
 const char *PARAM_INPUT_4 = "gateway";
 const char *PARAM_INPUT_5 = "server";
-
+bool reset_params = false;
 bool subscribeFlag = false;
 TaskHandle_t socketTaskHandle = NULL;
 TaskHandle_t DNSTaskHandle = NULL;
@@ -186,8 +186,14 @@ void initWebAppServer()
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + ip);
-      delay(30000);
-      ESP.restart(); });
+
+
+      // -- This is freaking insane. no sense to do this but ... 
+      reset_params = true;
+      // end of madness
+      
+      
+      });
   server.on(
       PATH_SENDCOMMAND,
       HTTP_POST,
