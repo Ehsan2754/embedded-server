@@ -28,6 +28,7 @@ jobs:
           cat /home/runner/.arduino15/arduino-cli.yaml
           for LIB in ./lib/*.zip; do echo $LIB; arduino-cli lib install --zip-path $LIB ;  done
       - name: Compile Sketch
+        id: compile-sketch
         run: |
           arduino-cli compile -e --fqbn esp32:esp32:esp32s3  ./
-          ls
+          ls -la ./build
