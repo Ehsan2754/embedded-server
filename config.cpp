@@ -117,12 +117,13 @@ uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
   return crc << 8 | crc >> 8;
 }
 
-char labtypes[5][5] = {
+char labtypes[6][5] = {
     "ZLAB",
     "PHYS",
     "CHEM",
     "ECO",
-    "BIO"};
+    "BIO",
+    "BIO2"};
 
 char* obtainLabtype()
 {
