@@ -75,8 +75,8 @@ void deinitBT()
 }
 void initBT()
 {
-    char devname[10];
-    sprintf(devname,"%s%s",obtainLabtype(),SN);
+    char devname[20];
+    sprintf(devname,"%s-%s",obtainLabtype(),SN);
     DEBUG_PRINTF(DEBUG_INFO"BT-Beacon->%s\n",devname);
     // Create the BLE Device
     BLEDevice::init(devname);
