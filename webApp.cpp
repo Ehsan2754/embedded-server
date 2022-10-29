@@ -218,11 +218,11 @@ void initWebAppServer()
   server.begin();
 }
 
-static char ssid_ap_str[SSID_AP_LEN + SERIAL_NO_LEN];
+static char ssid_ap_str[SSID_AP_LEN + SERIAL_NO_LEN+10];
 void initWifiAP()
 {
   WiFi.mode(WIFI_AP);
-   sprintf(ssid_ap_str, "%s%s", obtainLabtype(), SN);
+   sprintf(ssid_ap_str, "%s-%s", obtainLabtype(), SN);
   DEBUG_PRINTLN(DEBUG_INFO "WiFi Access-Point initialized.");
   // Connect to Wi-Fi network with SSID and password
   DEBUG_PRINT(DEBUG_INFO "Setting AP (Access Point) SSID=");

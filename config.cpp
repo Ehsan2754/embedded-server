@@ -117,13 +117,16 @@ uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
   return crc << 8 | crc >> 8;
 }
 
-char labtypes[6][5] = {
+char labtypes[8][6] = {
     "ZLAB",
     "PHYS",
     "CHEM",
     "ECO",
     "BIO",
-    "BIO2"};
+    "PHYS2",//11
+    "ECO2",//13
+    "BIO2"//14
+    };
 
 char* obtainLabtype()
 {
@@ -156,6 +159,18 @@ char* obtainLabtype()
   case 3:
   case 4:
     result_labtype = labtypes[RESP_BUFFER[10]];
+    DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
+    break;
+  case 11:
+    result_labtype = labtypes[5];
+    DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
+    break;
+  case 13:
+    result_labtype = labtypes[6];
+    DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
+    break;
+  case 14:
+    result_labtype = labtypes[7];
     DEBUG_PRINTF(DEBUG_INFO "LAB-TYPE=%s\n", result_labtype);
     break;
   }
