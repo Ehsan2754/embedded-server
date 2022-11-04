@@ -109,7 +109,7 @@ void initBT()
     bleAdvertising->addServiceUUID(SERVICE_UUID);
     bleAdvertising->setScanResponse(true);
     bleAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
-    bleAdvertising->setMinPreferred(0x12);
+    // bleAdvertising->setMinPreferred(0x12);
     bleAdvertising->start();
     BLEDevice::startAdvertising();
     DEBUG_PRINTLN(DEBUG_INFO"Waiting a client connection to notify...");
