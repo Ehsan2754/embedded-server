@@ -171,7 +171,7 @@ void setup()
 const TickType_t xDelay = 5000 / portTICK_PERIOD_MS;
 void loop()
 {
-    if ((!digitalRead(PIN_TRIGGER)) || reset_params)
+    if (((!digitalRead(PIN_TRIGGER)) || reset_params)&& wifiFlag)
     {
         vTaskDelay(xDelay);
         if ((!digitalRead(PIN_TRIGGER)) || reset_params)
