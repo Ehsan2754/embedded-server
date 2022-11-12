@@ -2,9 +2,16 @@ name: build
 
 on: [push, pull_request]
 
+env:
+  VERSION: 3.0
+  TARGET_DIR: /build/esp32.esp32.esp32s3
+  TARGET_NAME: embedded-server
+  SKETCH_NAME: embedded-server.ino
+  
+
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -31,4 +38,40 @@ jobs:
         id: compile-sketch
         run: |
           arduino-cli compile -e --fqbn esp32:esp32:esp32s3  ./
-          ls -la ./build
+          ls -la ./build/esp32.esp32.esp32s3
+
+
+      - name: Upload .bin 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.bin
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.bin
+
+      - name: Upload .partitions.bin 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.partitions.bin
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.partitions.bin
+
+      - name: Upload .elf 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.elf
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.elf
+
+      - name: Upload .map 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.map
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.map
+
+      - name: release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TARGET_NAME }}v${{ env.VERSION }}-${{ github.run_number }}
+          release_name: ${{ env.TARGET_NAME }}v${{ env.VERSION }}-${{ github.run_number }}
+          draft: false
+          prerelease: false
