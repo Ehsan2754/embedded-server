@@ -117,6 +117,45 @@ uint16_t MODBUS_CRC16(unsigned char *buf, unsigned int len)
   return crc << 8 | crc >> 8;
 }
 
+bool validatePackets(unsigned char *packet, unsigned int length)
+{
+  // TODO: change hardcoded inedxes
+  // Timeout case 
+  if (!length)
+  {
+    DEBUG_PRINTF(DEBUG_LAB "Device is off.\n");
+    return false;
+  }
+  // Min Length 1 start byte + 2 size bytes + 2 crc bytes
+  if (length < 1+2+2 )
+  {
+    DEBUG_PRINTLN(DEBUG_LAB "ERROR->Corrupted Packet.\n");
+    return false;
+  }
+  // Start byte evaluation
+  if (packet[0]!= 0xAA)
+  {
+    DEBUG_PRINTF(DEBUG_LAB "ERROR->Invalid Start Packet. Start byte = 0X%X\n", packet[0]);
+    return false;
+
+  }
+  // CRC  check
+  uint16_t crc =((packet[length - 2] << 8) | packet[length - 1]);
+  if (crc != MODBUS_CRC16(packet, length - 2))
+  {
+    DEBUG_PRINTLN(DEBUG_LAB "ERROR->Invalid CRC!");
+    return false;
+  }
+  // Size check
+  uint16_t pktSize =((packet[2] << 8) | packet[1]);
+  if (pktSize != length)
+  {
+    DEBUG_PRINTLN(DEBUG_LAB "ERROR->Invalid packet size!");
+    return false;
+  }
+  return true;
+}
+
 char labtypes[8][6] = {
     "ZLAB",
     "PHYS",
@@ -183,22 +222,9 @@ uint16_t obtainSerialNumber()
   unsigned char GET_HW_CONFIG_Tx[] = {0xAA, 0x06, 0x00, 0x83, 0x80, 0x5C};
   unsigned char RESP_BUFFER[128];
   auto LenResp = transmitCommand(GET_HW_CONFIG_Tx, 6, RESP_BUFFER, 128);
-  auto expectedLen = 66;
   uint16_t SerialNumber = 0;
-  if (!LenResp)
-  {
-    DEBUG_PRINTF(DEBUG_LAB "Device is off.\n", LenResp, expectedLen);
-    return 0;
-  }
 
-  if (LenResp != expectedLen)
-  {
-    DEBUG_PRINTF(DEBUG_LAB "ERROR->Invalid Package Length! GOT:%d : EXPECTED %d\n", LenResp, expectedLen);
-    SerialNumber = 0;
-  }
-  if (((RESP_BUFFER[LenResp - 2] << 8) | RESP_BUFFER[LenResp - 1]) != MODBUS_CRC16(RESP_BUFFER, LenResp - 2))
-  {
-    DEBUG_PRINTLN(DEBUG_LAB "ERROR->Invalid CRC!");
+  if(validatePackets(RESP_BUFFER, LenResp))  {
     SerialNumber = 0;
   }
   else
