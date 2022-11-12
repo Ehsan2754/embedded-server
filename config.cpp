@@ -175,18 +175,18 @@ char* obtainLabtype()
   unsigned char GET_INFO[] = {0xAA, 0x06, 0x00, 0x00, 0xc1, 0xfd};
   unsigned char RESP_BUFFER[128];
   auto LenResp = transmitCommand(GET_INFO, 6, RESP_BUFFER, 128);
-  auto expectedLen = 38;
-  if (!LenResp)
+  uint8_t type = 0;
+  if (!validatePackets(RESP_BUFFER,LenResp))
   {
-    DEBUG_PRINTF(DEBUG_LAB "Device is off.\n", LenResp, expectedLen);
-    return 0;
-  }
+    DEBUG_PRINTLN(DEBUG_LAB "ERROR->Error obtaining Lab Type!");
+    type = 0;
 
-  if (LenResp != expectedLen)
-  {
-    DEBUG_PRINTF(DEBUG_LAB "ERROR->Invalid Package Length! GOT:%d : EXPECTED %d\n", LenResp, expectedLen);
   }
-  switch (RESP_BUFFER[10])
+  else
+  {
+    type = RESP_BUFFER[10];
+  }
+  switch (type)
   {
   default:
   case 0:
@@ -224,7 +224,7 @@ uint16_t obtainSerialNumber()
   auto LenResp = transmitCommand(GET_HW_CONFIG_Tx, 6, RESP_BUFFER, 128);
   uint16_t SerialNumber = 0;
 
-  if(validatePackets(RESP_BUFFER, LenResp))  {
+  if(!validatePackets(RESP_BUFFER, LenResp))  {
     SerialNumber = 0;
   }
   else
