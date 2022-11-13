@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 env:
   VERSION: 3.0
-  TARGET_DIR: /build/esp32.esp32.esp32s3
+  TARGET_DIR: ./build/esp32.esp32.esp32s3
   TARGET_NAME: embedded-server
   SKETCH_NAME: embedded-server.ino
   
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v1
@@ -40,38 +40,87 @@ jobs:
           arduino-cli compile -e --fqbn esp32:esp32:esp32s3  ./
           ls -la ./build/esp32.esp32.esp32s3
 
-
-      - name: Upload .bin 
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.bin
-          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.bin
-
-      - name: Upload .partitions.bin 
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.partitions.bin
-          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.partitions.bin
-
-      - name: Upload .elf 
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.elf
-          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.elf
-
-      - name: Upload .map 
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.TARGET_NAME }}${{ env.VERSION }}.map
-          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.map
-
       - name: release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TARGET_NAME }}v${{ env.VERSION }}-${{ github.run_number }}
-          release_name: ${{ env.TARGET_NAME }}v${{ env.VERSION }}-${{ github.run_number }}
+          tag_name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}-${{ github.run_number }}
+          release_name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}-${{ github.run_number }}
           draft: false
           prerelease: false
+
+      - name: Upload .bin 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.bin
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.bin
+          
+      - name: Upload release asset .bin
+        id: upload-release-asset-bin
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.bin
+          asset_path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.bin
+          asset_content_type: application/bin
+
+
+
+
+      - name: Upload .partitions.bin 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.partitions.bin
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.partitions.bin
+          
+      - name: Upload release asset .partitions.bin
+        id: upload-release-asset-partitions-bin
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.partitions.bin
+          asset_path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.partitions.bin
+          asset_content_type: application/bin
+
+
+      - name: Upload .elf 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.elf
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.elf
+
+      - name: Upload release asset ELF
+        id: upload-release-asset-elf
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.elf
+          asset_path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.elf
+          asset_content_type: application/elf
+
+      - name: Upload .map 
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.map
+          path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.map
+
+      - name: Upload release asset MAP
+        id: upload-release-asset-map
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_name: ${{ env.TARGET_NAME }}V${{ env.VERSION }}.map
+          asset_path: ${{ env.TARGET_DIR }}/${{ env.SKETCH_NAME }}.map
+          asset_content_type: application/map
+
+
